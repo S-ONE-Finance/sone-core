@@ -1,6 +1,6 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider');
-const infuraProjectID = "1ee30a55a9084dbb91741085ccc9df47";
-const mnemonic = 'demand layer display heavy refuse maximum dash pool scheme mosquito neutral flag';
+const infuraProjectID = "";
+const mnemonic = '';
 
 module.exports = {
   contracts_directory: "./ethereum-contracts",
