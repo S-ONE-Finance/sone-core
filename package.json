@@ -9,7 +9,9 @@
     "@truffle/hdwallet-provider": "^1.2.1",
     "truffle": "^5.1.44",
     "truffle-flattener": "^1.4.4",
-    "truffle-hdwallet-provider": "^1.0.17"
+    "truffle-hdwallet-provider": "^1.0.17",
+    "ethereumjs-util": "^6.2.0",
+    "web3": "^1.2.6"
   },
   "scripts": {
     "compile": "yarn truffle compile",
