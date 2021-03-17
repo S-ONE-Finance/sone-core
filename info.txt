@@ -1,7 +1,0 @@
-WETH9: 0x070425a10c4132eeaB8cFbc369150A20EFFaC799
-UniswapV2Factory: 0x8e1864A946a30D145729563B960CFE5444e3d52B
-UniswapV2Router02: 0xF48162DBf2B03004dF354c6011d7f42294aDCbA6
-BytecodeHash: ce7b0028c97fa55bf49706a001a4154da6639a919eaeaf835755a2d85b550d46
-
-
-Subgraph: https://thegraph.com/explorer/subgraph/tungpham2020/bhswap
