@@ -1,8 +1,11 @@
 {
   "name": "@s-one-finance/core",
   "description": "🛠 Smart Contract for S-ONE Finance Swap.",
-  "version": "0.0.1-beta",
+  "version": "0.0.2",
   "main": "index.js",
+  "files": [
+    "build"
+  ],
   "license": "MIT",
   "repository": "https://github.com/S-ONE-Finance/soneswap-core.git",
   "keywords": [
