@@ -3,7 +3,7 @@ const infuraProjectID = "";
 const mnemonic = '';
 
 module.exports = {
-  contracts_directory: "./ethereum-contracts",
+  contracts_directory: "./contracts",
   networks: {
     dev: {
       host: "localhost",
