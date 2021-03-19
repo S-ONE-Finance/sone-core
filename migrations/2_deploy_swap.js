@@ -4,7 +4,7 @@ const UniswapV2Router02 = artifacts.require("UniswapV2Router02");
 // address of fee setter
 const feeSetterAddress = "0xAe7fD93a1419dee1376c0b9E27C969E85679AFd2";
 // address of WETH
-const wethAddress = "0x070425a10c4132eeaB8cFbc369150A20EFFaC799";
+const wethAddress = "0xc778417E063141139Fce010982780140Aa0cD5Ab";
 
 module.exports = async function (deployer) {
   // deploy factory

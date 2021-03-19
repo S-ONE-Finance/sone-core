@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 contract UniswapV2ERC20 {
     using SafeMath for uint;
 
-    string public constant name = 'LuaSwap LP Token V1';
-    string public constant symbol = 'LUA-V1';
+    string public constant name = 'SoneSwap LP Token V1';
+    string public constant symbol = 'SONE-V1';
     uint8 public constant decimals = 18;
     uint  public totalSupply;
     mapping(address => uint) public balanceOf;
