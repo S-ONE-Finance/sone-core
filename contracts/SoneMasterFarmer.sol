@@ -185,7 +185,7 @@ contract SoneMasterFarmer is Ownable {
         
         if (soneForDev > 0) {
             sone.mint(devaddr, soneForDev);
-            //For more simple, I lock reward for dev if mint reward in bonus time
+            // For more simple, I lock reward for dev if mint reward in bonus time
             if (block.number <= FINISH_BONUS_AT_BLOCK) {
                 sone.lock(devaddr, soneForDev.mul(PERCENT_LOCK_BONUS_REWARD).div(100));
             }

@@ -29,13 +29,13 @@
     "flatten": "yarn truffle-flattener",
     "deploy-swap:local": "yarn truffle migrate -f 2 --to 2 --network dev",
     "deploy-weth:local": "yarn truffle migrate -f 3 --to 3 --network dev",
-    "deploy-stake:local": "yarn truffle migrate -f 4 --to 4 --network dev",
-    "deploy-SONE:local": "yarn truffle migrate -f 5 --to 5 --network dev",
+    "deploy-SONE:local": "yarn truffle migrate -f 4 --to 4 --network dev",
+    "deploy-stake:local": "yarn truffle migrate -f 5 --to 5 --network dev",
     "deploy-swap:ropsten": "yarn truffle migrate -f 2 --to 2 --network ropsten",
-    "deploy-stake:ropsten": "yarn truffle migrate -f 4 --to 4 --network ropsten",
-    "deploy-SONE:ropsten": "yarn truffle migrate -f 5 --to 5 --network ropsten",
+    "deploy-SONE:ropsten": "yarn truffle migrate -f 4 --to 4 --network ropsten",
+    "deploy-stake:ropsten": "yarn truffle migrate -f 5 --to 5 --network ropsten",
     "deploy-swap:rinkeby": "yarn truffle migrate -f 2 --to 2 --network rinkeby",
-    "deploy-stake:rinkeby": "yarn truffle migrate -f 4 --to 4 --network rinkeby",
-    "deploy-SONE:rinkeby": "yarn truffle migrate -f 5 --to 5 --network rinkeby"
+    "deploy-SONE:rinkeby": "yarn truffle migrate -f 4 --to 4 --network rinkeby",
+    "deploy-stake:rinkeby": "yarn truffle migrate -f 5 --to 5 --network rinkeby"
   }
 }
