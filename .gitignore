@@ -2,6 +2,10 @@
 /build/
 /builds/
 .DS_Store
+*.log
 zscript
-truffle-config.js
 .idea
+.vscode
+
+truffle-config.js
+.env
