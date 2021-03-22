@@ -1,9 +1,9 @@
 const SoneToken = artifacts.require("SoneToken");
 const SoneMasterFarmer = artifacts.require("SoneMasterFarmer");
 
+const devAddresses = process.env.OPERATOR_ADDRESS || process.env.LOCAL_OPERATOR_ADDRESS;
 const lockFromBlock = 1;
 const lockToBlock = 10;
-const devAddresses = "0x88Cac51E652c4eD234aC461880dD0bd714ca5a1f";
 const rewardPerBlock = 10;
 const startBlock = 1;
 const halvingAfterBlock = 720;
