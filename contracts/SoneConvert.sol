@@ -19,8 +19,8 @@ contract SoneConvert {
     constructor(
         address _sone,
         address _weth,
-        address _factory,
-        address _routerv2
+        IUniswapV2Factory _factory,
+        IUniswapV2Router02 _routerv2
     ) public {
         sone = _sone;
         weth = _weth;
@@ -40,7 +40,7 @@ contract SoneConvert {
         uint256 lp = pair.balanceOf(address(this));
         uint256 lpToUser = share.mul(lp);
         if (lpToUser > 0) {
-            pair.transferFrom(address(this), pair, lpToUser);
+            pair.transferFrom(address(this), address(pair), lpToUser);
             (uint256 amount0, uint256 amount1) = pair.burn(address(this));
             convert(pair, amount0, amount1, user);
         }
@@ -48,8 +48,8 @@ contract SoneConvert {
 
     function convert(
         IUniswapV2Pair pair,
-        address amount0,
-        address amount1,
+        uint256 amount0,
+        uint256 amount1,
         address user
     ) public {
         address token0 = pair.token0();
