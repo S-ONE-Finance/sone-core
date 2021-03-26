@@ -58,19 +58,44 @@ contract SoneConvert {
         _safeApproveForRouterV2(token0);
         _safeApproveForRouterV2(token1);
 
+        // swap token to sone/weth
         _toBaseToken(token0, amount0);
         _toBaseToken(token1, amount1);
 
-        if (IERC20(weth).balanceOf(address(this)) > 0) {
-            _safeApproveForRouterV2(weth);
-            _swap(weth, sone, IERC20(weth).balanceOf(address(this)));
-        }
-
-        if (IERC20(sone).balanceOf(address(this)) > 0) {
-            IERC20(sone).safeTransfer(
+        uint256 balance0 = IERC20(token0).balanceOf(address(this));
+        uint256 balance1 = IERC20(token1).balanceOf(address(this));
+        // send token if both 2 token can not convert to sone
+        if (balance0 > 0 && balance1 > 0) {
+            IERC20(token0).safeTransfer(
                 user,
-                IERC20(sone).balanceOf(address(this))
+                IERC20(token0).balanceOf(address(this))
             );
+            IERC20(token1).safeTransfer(
+                user,
+                IERC20(token1).balanceOf(address(this))
+            );
+        } else {
+            if (balance0 > 0 && balance1 == 0) {
+                _swap(token0, token1, balance0);
+                _toBaseToken(token1, IERC20(token1).balanceOf(address(this)));
+            }
+            if (balance0 == 0 && balance1 > 0) {
+                _swap(token1, token0, balance1);
+                _toBaseToken(token0, IERC20(token0).balanceOf(address(this)));
+            }
+            // swap weth to sone
+            if (IERC20(weth).balanceOf(address(this)) > 0) {
+                _safeApproveForRouterV2(weth);
+                _swap(weth, sone, IERC20(weth).balanceOf(address(this)));
+            }
+
+            // send sone to user
+            if (IERC20(sone).balanceOf(address(this)) > 0) {
+                IERC20(sone).safeTransfer(
+                    user,
+                    IERC20(sone).balanceOf(address(this))
+                );
+            }
         }
     }
 
@@ -115,4 +140,5 @@ contract SoneConvert {
         IERC20(token).safeApprove(address(routerv2), 0);
         IERC20(token).safeApprove(address(routerv2), uint256(-1));
     }
+
 }

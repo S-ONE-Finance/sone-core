@@ -23,4 +23,5 @@ interface IUniswapV2Factory {
     function setSwapFee(uint) external;
     function setFeeSetter(address) external;
     function setMigrator(address) external;
+    function setSoneConvert(address) external;
 }

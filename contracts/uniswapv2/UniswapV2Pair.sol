@@ -104,9 +104,14 @@ contract UniswapV2Pair is UniswapV2ERC20 {
                 uint rootKLast = Math.sqrt(_kLast);
                 if (rootK > rootKLast) {
                     uint numerator = totalSupply.mul(rootK.sub(rootKLast));
-                    uint denominator = rootK.mul(fee * 2 - 1).add(rootKLast);
+                    uint denominator = rootK.mul(2).add(rootKLast);
                     uint liquidity = numerator / denominator;
-                    if (liquidity > 0) _mint(feeTo, liquidity);
+                   if (liquidity > 0) {
+                        if (liquidity.div(2) > 0) {
+                            _mint(feeTo, liquidity.div(2));
+                            _mint(feeTo, liquidity.div(2));
+                        }
+                    }
                 }
             }
         } else if (_kLast != 0) {
