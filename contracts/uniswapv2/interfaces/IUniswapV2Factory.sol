@@ -8,6 +8,7 @@ interface IUniswapV2Factory {
     function withdrawFeeTo() external view returns (address);
     function swapFee() external view returns (uint);
     function withdrawFee() external view returns (uint);
+    function soneConvert() external view returns (address);
     
     function feeSetter() external view returns (address);
     function migrator() external view returns (address);

@@ -14,7 +14,7 @@ contract UniswapV2Factory is IUniswapV2Factory {
     address public override feeSetter;
     address public override migrator;
 
-    address public soneConvert;
+    address public override soneConvert;
 
     mapping(address => mapping(address => address)) public override getPair;
     address[] public override allPairs;

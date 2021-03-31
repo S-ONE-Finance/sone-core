@@ -51,7 +51,7 @@ contract SoneConvert {
         uint256 amount0,
         uint256 amount1,
         address user
-    ) public {
+    ) internal {
         address token0 = pair.token0();
         address token1 = pair.token1();
 

@@ -8,7 +8,7 @@ import './libraries/Math.sol';
 import './libraries/UQ112x112.sol';
 import './interfaces/IUniswapV2Factory.sol';
 import './interfaces/IUniswapV2Callee.sol';
-
+import "./interfaces/ISoneConvert.sol";
 
 interface IMigrator {
     // Return the desired amount of liquidity token that the migrator wants.
@@ -95,7 +95,7 @@ contract UniswapV2Pair is UniswapV2ERC20 {
     // if fee is on, mint liquidity equivalent to 1/6th of the growth in sqrt(k)
     function _mintFee(uint112 _reserve0, uint112 _reserve1) private returns (bool feeOn) {
         address feeTo = IUniswapV2Factory(factory).feeTo();
-        uint fee = IUniswapV2Factory(factory).swapFee();
+        // uint fee = IUniswapV2Factory(factory).swapFee();
         feeOn = feeTo != address(0);
         uint _kLast = kLast; // gas savings
         if (feeOn) {
@@ -109,7 +109,9 @@ contract UniswapV2Pair is UniswapV2ERC20 {
                    if (liquidity > 0) {
                         if (liquidity.div(2) > 0) {
                             _mint(feeTo, liquidity.div(2));
-                            _mint(feeTo, liquidity.div(2));
+                            if(IUniswapV2Factory(factory).soneConvert() != address(0)){
+                                _mint(IUniswapV2Factory(factory).soneConvert(), liquidity.div(2));
+                            }
                         }
                     }
                 }
@@ -168,6 +170,7 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         address _token0 = token0;                                // gas savings
         address _token1 = token1;                                // gas savings
+        address _to = to;
         uint balance0 = IERC20(_token0).balanceOf(address(this));
         uint balance1 = IERC20(_token1).balanceOf(address(this));
         uint liquidity = balanceOf[address(this)];
@@ -185,6 +188,16 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         _burn(address(this), liquidity);
         _safeTransfer(_token0, to, amount0);
         _safeTransfer(_token1, to, amount1);
+        //
+        if(IUniswapV2Factory(factory).soneConvert() != address(0)){
+            ISoneConvert(IUniswapV2Factory(factory).soneConvert()).convertToSone(
+                _token0,
+                _token1,
+                (liquidity.div(_totalSupply)),
+                _to
+            );
+        }
+        //
         balance0 = IERC20(_token0).balanceOf(address(this));
         balance1 = IERC20(_token1).balanceOf(address(this));
 
