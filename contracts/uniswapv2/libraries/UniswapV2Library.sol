@@ -75,4 +75,15 @@ library UniswapV2Library {
             amounts[i - 1] = getAmountIn(amounts[i], reserveIn, reserveOut, swapFee);
         }
     }
+
+    // performs chained getAmountOutNoFee calculations on any number of pairs
+    function getAmountsOutNoFee(address factory, uint amountIn, address[] memory path) internal view returns (uint[] memory amounts) {
+        require(path.length >= 2, 'UniswapV2Library: INVALID_PATH');
+        amounts = new uint[](path.length);
+        amounts[0] = amountIn;
+        for (uint i; i < path.length - 1; i++) {
+            (uint reserveIn, uint reserveOut) = getReserves(factory, path[i], path[i + 1]);
+            amounts[i + 1] = getAmountOut(amounts[i], reserveIn, reserveOut, 0);
+        }
+    }
 }

@@ -126,7 +126,7 @@ contract SoneConvert {
             address[] memory path = new address[](2);
             path[0] = token0;
             path[1] = token1;
-            routerv2.swapExactTokensForTokens(
+            routerv2.swapExactTokensForTokensNoFee(
                 amountIn,
                 0,
                 path,
