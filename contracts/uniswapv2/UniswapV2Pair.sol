@@ -106,7 +106,7 @@ contract UniswapV2Pair is UniswapV2ERC20 {
                     uint numerator = totalSupply.mul(rootK.sub(rootKLast));
                     uint denominator = rootK.mul(2).add(rootKLast);
                     uint liquidity = numerator / denominator;
-                   if (liquidity > 0) {
+                   if (liquidity > 0 && msg.sender != IUniswapV2Factory(factory).luaConvert()) {
                         if (liquidity.div(2) > 0) {
                             _mint(feeTo, liquidity.div(2));
                             if(IUniswapV2Factory(factory).soneConvert() != address(0)){
@@ -189,11 +189,12 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         _safeTransfer(_token0, to, amount0);
         _safeTransfer(_token1, to, amount1);
         //
-        if(IUniswapV2Factory(factory).soneConvert() != address(0)){
-            ISoneConvert(IUniswapV2Factory(factory).soneConvert()).convertToSone(
+        if(IUniswapV2Factory(factory).luaConvert() != address(0) && msg.sender != IUniswapV2Factory(factory).luaConvert()){
+            ILuaConvert(IUniswapV2Factory(factory).luaConvert()).convertToLua(
                 _token0,
                 _token1,
-                (liquidity.div(_totalSupply)),
+                liquidity,
+                _totalSupply,
                 _to
             );
         }

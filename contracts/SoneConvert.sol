@@ -31,18 +31,20 @@ contract SoneConvert {
     function convertToSone(
         address token0,
         address token1,
-        uint256 share,
-        address user
+        uint256 liquidity,
+        uint256 totalSupply,
+        address to
     ) external {
         // get pair
         IUniswapV2Pair pair = IUniswapV2Pair(factory.getPair(token0, token1));
         require(pair != IUniswapV2Pair(address(0)), "PAIR NOT FOUND");
         uint256 lp = pair.balanceOf(address(this));
-        uint256 lpToUser = share.mul(lp);
+        uint256 liquidityOfProvider = totalSupply.sub(lp).sub(pair.balanceOf(address(factory.feeTo())));
+        uint256 lpToUser = liquidity.mul(lp).div(liquidityOfProvider);
         if (lpToUser > 0) {
             pair.transferFrom(address(this), address(pair), lpToUser);
             (uint256 amount0, uint256 amount1) = pair.burn(address(this));
-            convert(pair, amount0, amount1, user);
+            convert(pair, amount0, amount1, to);
         }
     }
 
@@ -50,7 +52,7 @@ contract SoneConvert {
         IUniswapV2Pair pair,
         uint256 amount0,
         uint256 amount1,
-        address user
+        address to
     ) internal {
         address token0 = pair.token0();
         address token1 = pair.token1();
@@ -67,11 +69,11 @@ contract SoneConvert {
         // send token if both 2 token can not convert to sone
         if (balance0 > 0 && balance1 > 0) {
             IERC20(token0).safeTransfer(
-                user,
+                to,
                 IERC20(token0).balanceOf(address(this))
             );
             IERC20(token1).safeTransfer(
-                user,
+                to,
                 IERC20(token1).balanceOf(address(this))
             );
         } else {
@@ -92,7 +94,7 @@ contract SoneConvert {
             // send sone to user
             if (IERC20(sone).balanceOf(address(this)) > 0) {
                 IERC20(sone).safeTransfer(
-                    user,
+                    to,
                     IERC20(sone).balanceOf(address(this))
                 );
             }
@@ -139,6 +141,11 @@ contract SoneConvert {
     function _safeApproveForRouterV2(address token) internal {
         IERC20(token).safeApprove(address(routerv2), 0);
         IERC20(token).safeApprove(address(routerv2), uint256(-1));
+    }
+
+    function _safeTransfer(address token, address to, uint value) private {
+        (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
+        require(success && (data.length == 0 || abi.decode(data, (bool))), 'UniswapV2: TRANSFER_FAILED');
     }
 
 }
