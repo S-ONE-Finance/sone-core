@@ -1,17 +1,33 @@
 const UniswapV2Factory = artifacts.require('UniswapV2Factory')
 const UniswapV2Pair = artifacts.require('UniswapV2Pair')
+const WETH = artifacts.require('WETH9')
+const UniswapV2Router02 = artifacts.require('UniswapV2Router02')
+const SoneToken = artifacts.require('SoneToken')
+const SoneConvert = artifacts.require('SoneConvert')
 const MockERC20 = artifacts.require('MockERC20')
 const BigNumber = require('bn.js')
 var BN = (s) => new BigNumber(s.toString(), 10)
 
 const MINIMUM_LIQUIDITY = 1000
 
-contract('liquidity', ([alice, bob]) => {
+function getAmountOut(amountIn, reserveIn, reserveOut, swapFee) {
+  var amountInWithFee = amountIn.mul(BN(1000).sub(swapFee))
+  var numerator = amountInWithFee.mul(reserveOut)
+  var denominator = reserveIn.mul(BN(1000)).add(amountInWithFee)
+  return numerator.div(denominator)
+}
+
+contract('liquidity', ([alice, bob, owner]) => {
   beforeEach(async () => {
-    this.factory = await UniswapV2Factory.new(alice, { from: alice })
+    this.factory = await UniswapV2Factory.new(owner, { from: owner })
     this.token0 = await MockERC20.new('TOKEN0', 'TOKEN0', '10000000', { from: alice })
     this.token1 = await MockERC20.new('TOKEN1', 'TOKEN1', '10000000', { from: alice })
+    this.weth = await WETH.new({ from: owner })
+    this.router = await UniswapV2Router02.new(this.factory.address, this.weth.address, { from: owner })
     this.pair = await UniswapV2Pair.at((await this.factory.createPair(this.token0.address, this.token1.address)).logs[0].args.pair)
+    this.soneToken = await SoneToken.new(1, 1000, {from: owner})
+    this.soneConvert = await SoneConvert.new(this.soneToken.address, this.weth.address, this.factory.address, this.router.address, { from: owner })
+    this.swapFee = await this.factory.swapFee()
   })
 
   describe('#add liquidity', async () => {
@@ -44,7 +60,7 @@ contract('liquidity', ([alice, bob]) => {
     })
   
     it('burn: with fee', async () => {
-      await this.factory.setWithdrawFeeTo(bob, { from: alice })
+      await this.factory.setWithdrawFeeTo(bob, { from: owner })
   
       await this.token0.transfer(this.pair.address, '1000000', { from: alice })
       await this.token1.transfer(this.pair.address, '1000000', { from: alice })
@@ -63,5 +79,43 @@ contract('liquidity', ([alice, bob]) => {
       assert.equal(reserves[1].valueOf(), 1999)
     })
   });
+  describe('#withdraw liquidity with sone covert', async () => {
+    beforeEach(async () => {
+      await this.factory.setSoneConvert(this.soneConvert.address, { from: owner })
+      await this.factory.setFeeTo(owner, { from: owner })
+      await this.token0.mint(bob, 10000000)
+      await this.token1.mint(bob, 10000000)
+    })
+    it('fee to', async () => {
+      await this.token0.transfer(this.pair.address, '1000000', { from: alice })
+      await this.token1.transfer(this.pair.address, '1000000', { from: alice })
+      await this.pair.mint(alice, { from: alice })
 
+      await this.token0.transfer(this.pair.address, '1000000', { from: bob })
+      await this.token1.transfer(this.pair.address, '1000000', { from: bob })
+      await this.pair.mint(bob, { from: bob })
+
+      for (let index = 1; index < 20; index++) {
+        let reserveIn = await this.pair.getReserves();
+        const amountOut = getAmountOut(BN(1000), reserveIn[0], reserveIn[1], BN(this.swapFee))
+        await this.token0.transfer(this.pair.address, '1000', { from: alice })
+        await this.pair.swap(0, amountOut, alice, '0x', { from: alice })
+      }
+
+      let totalSupplyLiquid = (await this.pair.totalSupply()).valueOf()
+
+      await this.pair.transfer(this.pair.address, 1000000, { from: bob})
+      await this.pair.burn(bob, { from: bob })
+      await this.soneConvert.convertToSone(
+        this.token0.address,
+        this.token1.address,
+        BN(1000000),
+        totalSupplyLiquid,
+        bob
+      )
+
+      assert.equal((await this.token0.balanceOf(bob)).valueOf(), 10009496)
+      assert.equal((await this.token1.balanceOf(bob)).valueOf(), 9990619)
+    })
+  })
 })

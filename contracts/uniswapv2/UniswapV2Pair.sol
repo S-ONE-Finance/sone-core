@@ -105,7 +105,7 @@ contract UniswapV2Pair is UniswapV2ERC20 {
                     uint numerator = totalSupply.mul(rootK.sub(rootKLast));
                     uint denominator = rootK.mul(2).add(rootKLast);
                     uint liquidity = numerator / denominator;
-                   if (liquidity > 0 && msg.sender != IUniswapV2Factory(factory).luaConvert()) {
+                   if (liquidity > 0 && msg.sender != IUniswapV2Factory(factory).soneConvert()) {
                         if (liquidity.div(2) > 0) {
                             _mint(feeTo, liquidity.div(2));
                             if(IUniswapV2Factory(factory).soneConvert() != address(0)){
@@ -169,7 +169,6 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         (uint112 _reserve0, uint112 _reserve1,) = getReserves(); // gas savings
         address _token0 = token0;                                // gas savings
         address _token1 = token1;                                // gas savings
-        address _to = to;
         uint balance0 = IERC20(_token0).balanceOf(address(this));
         uint balance1 = IERC20(_token1).balanceOf(address(this));
         uint liquidity = balanceOf[address(this)];
@@ -183,7 +182,7 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
         amount0 = liquidity.mul(balance0) / _totalSupply; // using balances ensures pro-rata distribution
         amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
-        if(msg.sender != IUniswapV2Factory(factory).luaConvert()){
+        if(msg.sender != IUniswapV2Factory(factory).soneConvert()){
             require(amount0 > 0 && amount1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED');
         }
         _burn(address(this), liquidity);

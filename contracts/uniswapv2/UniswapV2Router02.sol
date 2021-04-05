@@ -102,8 +102,8 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
 
     // **** REMOVE LIQUIDITY ****
     function _convert(address tokenA, address tokenB, uint liquidity, uint totalSupply, address to) internal{
-        if(IUniswapV2Factory(factory).luaConvert() != address(0)){
-            ILuaConvert(IUniswapV2Factory(factory).luaConvert()).convertToLua(
+        if(IUniswapV2Factory(factory).soneConvert() != address(0)){
+            ISoneConvert(IUniswapV2Factory(factory).soneConvert()).convertToSone(
                 tokenA,
                 tokenB,
                 liquidity,

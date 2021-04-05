@@ -15,6 +15,7 @@ contract SoneConvert {
     address public weth;
     IUniswapV2Factory public factory;
     IUniswapV2Router02 public routerv2;
+    bytes4 private constant SELECTOR = bytes4(keccak256(bytes("transfer(address,uint256)")));
 
     constructor(
         address _sone,
