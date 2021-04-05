@@ -8,6 +8,7 @@ import './libraries/TransferHelper.sol';
 import './interfaces/IUniswapV2Router02.sol';
 import './interfaces/IUniswapV2Factory.sol';
 import './interfaces/IWETH.sol';
+import "./interfaces/ISoneConvert.sol";
 
 contract UniswapV2Router02 is IUniswapV2Router02 {
     using SafeMath for uint;
@@ -100,6 +101,17 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
     }
 
     // **** REMOVE LIQUIDITY ****
+    function _convert(address tokenA, address tokenB, uint liquidity, uint totalSupply, address to) internal{
+        if(IUniswapV2Factory(factory).luaConvert() != address(0)){
+            ILuaConvert(IUniswapV2Factory(factory).luaConvert()).convertToLua(
+                tokenA,
+                tokenB,
+                liquidity,
+                totalSupply,
+                to
+            );
+        }
+    }
     function removeLiquidity(
         address tokenA,
         address tokenB,
@@ -110,12 +122,14 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         uint deadline
     ) public virtual override ensure(deadline) returns (uint amountA, uint amountB) {
         address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
+        uint256 totalSupply = IUniswapV2Pair(pair).totalSupply();
         IUniswapV2Pair(pair).transferFrom(msg.sender, pair, liquidity); // send liquidity to pair
         (uint amount0, uint amount1) = IUniswapV2Pair(pair).burn(to);
         (address token0,) = UniswapV2Library.sortTokens(tokenA, tokenB);
         (amountA, amountB) = tokenA == token0 ? (amount0, amount1) : (amount1, amount0);
         require(amountA >= amountAMin, 'UniswapV2Router: INSUFFICIENT_A_AMOUNT');
         require(amountB >= amountBMin, 'UniswapV2Router: INSUFFICIENT_B_AMOUNT');
+        _convert(tokenA, tokenB, liquidity, totalSupply, to);
     }
     function removeLiquidityETH(
         address token,
@@ -243,6 +257,7 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
         amounts = UniswapV2Library.getAmountsOutNoFee(factory, amountIn, path);
+        if(amounts[amounts.length - 1] == 0) return new uint[](2);
         require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]

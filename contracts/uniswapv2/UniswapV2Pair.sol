@@ -8,7 +8,6 @@ import './libraries/Math.sol';
 import './libraries/UQ112x112.sol';
 import './interfaces/IUniswapV2Factory.sol';
 import './interfaces/IUniswapV2Callee.sol';
-import "./interfaces/ISoneConvert.sol";
 
 interface IMigrator {
     // Return the desired amount of liquidity token that the migrator wants.
@@ -184,21 +183,12 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
         amount0 = liquidity.mul(balance0) / _totalSupply; // using balances ensures pro-rata distribution
         amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
-        require(amount0 > 0 && amount1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED');
+        if(msg.sender != IUniswapV2Factory(factory).luaConvert()){
+            require(amount0 > 0 && amount1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED');
+        }
         _burn(address(this), liquidity);
         _safeTransfer(_token0, to, amount0);
         _safeTransfer(_token1, to, amount1);
-        //
-        if(IUniswapV2Factory(factory).luaConvert() != address(0) && msg.sender != IUniswapV2Factory(factory).luaConvert()){
-            ILuaConvert(IUniswapV2Factory(factory).luaConvert()).convertToLua(
-                _token0,
-                _token1,
-                liquidity,
-                _totalSupply,
-                _to
-            );
-        }
-        //
         balance0 = IERC20(_token0).balanceOf(address(this));
         balance1 = IERC20(_token1).balanceOf(address(this));
 
