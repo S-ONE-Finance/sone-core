@@ -18,7 +18,7 @@ First clone the repository:
 git clone https://github.com/S-ONE-Finance/soneswap-core.git
 ```
 
-Move into the soneswap-sdk working directory
+Move into the soneswap-core working directory
 
 ```sh
 cd soneswap-core
