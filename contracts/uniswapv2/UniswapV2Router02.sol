@@ -257,8 +257,11 @@ contract UniswapV2Router02 is IUniswapV2Router02 {
         uint deadline
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
         amounts = UniswapV2Library.getAmountsOutNoFee(factory, amountIn, path);
-        if(amounts[amounts.length - 1] == 0) return new uint[](2);
-        require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+        if(amounts[1] == 0) return new uint[](2);
+        (address token0, address token1) = UniswapV2Library.sortTokens(path[0], path[1]);
+        (uint reserve0, uint reserve1) = UniswapV2Library.getReserves(factory, path[0], path[1]);
+        if(token0 == path[1] && reserve0 < amounts[1]) return new uint[](2);
+        if(token1 == path[1] && reserve1 < amounts[1]) return new uint[](2);
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );

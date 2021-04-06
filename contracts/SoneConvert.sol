@@ -70,14 +70,8 @@ contract SoneConvert {
         uint256 balance1 = IERC20(token1).balanceOf(address(this));
         // send token if both 2 token can not convert to sone
         if (balance0 > 0 && balance1 > 0) {
-            IERC20(token0).safeTransfer(
-                to,
-                IERC20(token0).balanceOf(address(this))
-            );
-            IERC20(token1).safeTransfer(
-                to,
-                IERC20(token1).balanceOf(address(this))
-            );
+            IERC20(token0).safeTransfer(to, IERC20(token0).balanceOf(address(this)));
+            IERC20(token1).safeTransfer(to, IERC20(token1).balanceOf(address(this)));
         } else {
             if (balance0 > 0 && balance1 == 0) {
                 _swap(token0, token1, balance0);
@@ -93,13 +87,11 @@ contract SoneConvert {
                 _swap(weth, sone, IERC20(weth).balanceOf(address(this)));
             }
 
-            // send sone to user
-            if (IERC20(sone).balanceOf(address(this)) > 0) {
-                IERC20(sone).safeTransfer(
-                    to,
-                    IERC20(sone).balanceOf(address(this))
-                );
-            }
+            // send token to user
+            _transferTokenRemain(sone, to);
+            _transferTokenRemain(weth, to);
+            _transferTokenRemain(token0, to);
+            _transferTokenRemain(token1, to);
         }
     }
 
@@ -145,9 +137,15 @@ contract SoneConvert {
         IERC20(token).safeApprove(address(routerv2), uint256(-1));
     }
 
-    function _safeTransfer(address token, address to, uint value) private {
+    function _safeTransfer(address token, address to, uint value) internal {
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'UniswapV2: TRANSFER_FAILED');
+    }
+
+    function _transferTokenRemain(address token, address to) internal {
+        if (IERC20(token).balanceOf(address(this)) > 0) {
+            IERC20(token).safeTransfer(to,IERC20(token).balanceOf(address(this)));
+        }
     }
 
 }
