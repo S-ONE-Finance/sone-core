@@ -43,7 +43,8 @@ contract SoneConvert {
         uint256 liquidityOfProvider = totalSupply.sub(lp).sub(pair.balanceOf(address(factory.feeTo())));
         uint256 lpToUser = liquidity.mul(lp).div(liquidityOfProvider);
         if (lpToUser > 0) {
-            pair.transferFrom(address(this), address(pair), lpToUser);
+            _safeTransfer(address(pair), address(pair), lpToUser);
+            // pair.transferFrom(address(this), address(pair), lpToUser);
             (uint256 amount0, uint256 amount1) = pair.burn(address(this));
             convert(pair, amount0, amount1, to);
         }

@@ -30,55 +30,55 @@ contract('liquidity', ([alice, bob, owner]) => {
     this.swapFee = await this.factory.swapFee()
   })
 
-  describe('#add liquidity', async () => {
-    it('mint', async () => {
-      await this.token0.transfer(this.pair.address, '1000000', { from: alice })
-      await this.token1.transfer(this.pair.address, '1000000', { from: alice })
-      await this.pair.mint(alice, { from: alice })
+  // describe('#add liquidity', async () => {
+  //   it('mint', async () => {
+  //     await this.token0.transfer(this.pair.address, '1000000', { from: alice })
+  //     await this.token1.transfer(this.pair.address, '1000000', { from: alice })
+  //     await this.pair.mint(alice, { from: alice })
   
-      assert.equal((await this.pair.totalSupply()).valueOf(), 1000000)
-      assert.equal((await this.pair.balanceOf(alice)).valueOf(), 1000000 - MINIMUM_LIQUIDITY)
-      const reserves = await this.pair.getReserves()
-      assert.equal(reserves[0].valueOf(), 1000000)
-      assert.equal(reserves[1].valueOf(), 1000000)
-    })
-  });
-  describe('#withdraw liquidity', async () => {
-    it('burn: without fee', async () => {
-      await this.token0.transfer(this.pair.address, '1000000', { from: alice })
-      await this.token1.transfer(this.pair.address, '1000000', { from: alice })
-      await this.pair.mint(alice, { from: alice })
+  //     assert.equal((await this.pair.totalSupply()).valueOf(), 1000000)
+  //     assert.equal((await this.pair.balanceOf(alice)).valueOf(), 1000000 - MINIMUM_LIQUIDITY)
+  //     const reserves = await this.pair.getReserves()
+  //     assert.equal(reserves[0].valueOf(), 1000000)
+  //     assert.equal(reserves[1].valueOf(), 1000000)
+  //   })
+  // });
+  // describe('#withdraw liquidity', async () => {
+  //   it('burn: without fee', async () => {
+  //     await this.token0.transfer(this.pair.address, '1000000', { from: alice })
+  //     await this.token1.transfer(this.pair.address, '1000000', { from: alice })
+  //     await this.pair.mint(alice, { from: alice })
   
-      await this.pair.transfer(this.pair.address, 1000000 - MINIMUM_LIQUIDITY, { from: alice})
-      await this.pair.burn(alice, { from: alice })
+  //     await this.pair.transfer(this.pair.address, 1000000 - MINIMUM_LIQUIDITY, { from: alice})
+  //     await this.pair.burn(alice, { from: alice })
   
-      assert.equal((await this.pair.totalSupply()).valueOf(), MINIMUM_LIQUIDITY)
-      assert.equal((await this.pair.balanceOf(alice)).valueOf(), 0)
-      const reserves = await this.pair.getReserves()
-      assert.equal(reserves[0].valueOf(), MINIMUM_LIQUIDITY)
-      assert.equal(reserves[1].valueOf(), MINIMUM_LIQUIDITY)
-    })
+  //     assert.equal((await this.pair.totalSupply()).valueOf(), MINIMUM_LIQUIDITY)
+  //     assert.equal((await this.pair.balanceOf(alice)).valueOf(), 0)
+  //     const reserves = await this.pair.getReserves()
+  //     assert.equal(reserves[0].valueOf(), MINIMUM_LIQUIDITY)
+  //     assert.equal(reserves[1].valueOf(), MINIMUM_LIQUIDITY)
+  //   })
   
-    it('burn: with fee', async () => {
-      await this.factory.setWithdrawFeeTo(bob, { from: owner })
+  //   it('burn: with fee', async () => {
+  //     await this.factory.setWithdrawFeeTo(bob, { from: owner })
   
-      await this.token0.transfer(this.pair.address, '1000000', { from: alice })
-      await this.token1.transfer(this.pair.address, '1000000', { from: alice })
-      await this.pair.mint(alice, { from: alice })
+  //     await this.token0.transfer(this.pair.address, '1000000', { from: alice })
+  //     await this.token1.transfer(this.pair.address, '1000000', { from: alice })
+  //     await this.pair.mint(alice, { from: alice })
   
-      await this.pair.transfer(this.pair.address, 1000000 - MINIMUM_LIQUIDITY, { from: alice})
-      await this.pair.burn(alice, { from: alice })
+  //     await this.pair.transfer(this.pair.address, 1000000 - MINIMUM_LIQUIDITY, { from: alice})
+  //     await this.pair.burn(alice, { from: alice })
   
-      assert.equal((await this.pair.totalSupply()).valueOf(), MINIMUM_LIQUIDITY + 999)
-      assert.equal((await this.pair.balanceOf(alice)).valueOf(), 0)
-      assert.equal((await this.token0.balanceOf(alice)).valueOf(), 9998001)
-      assert.equal((await this.token1.balanceOf(alice)).valueOf(), 9998001)
-      assert.equal((await this.pair.balanceOf(bob)).valueOf(), 999)
-      const reserves = await this.pair.getReserves()
-      assert.equal(reserves[0].valueOf(), 1999)
-      assert.equal(reserves[1].valueOf(), 1999)
-    })
-  });
+  //     assert.equal((await this.pair.totalSupply()).valueOf(), MINIMUM_LIQUIDITY + 999)
+  //     assert.equal((await this.pair.balanceOf(alice)).valueOf(), 0)
+  //     assert.equal((await this.token0.balanceOf(alice)).valueOf(), 9998001)
+  //     assert.equal((await this.token1.balanceOf(alice)).valueOf(), 9998001)
+  //     assert.equal((await this.pair.balanceOf(bob)).valueOf(), 999)
+  //     const reserves = await this.pair.getReserves()
+  //     assert.equal(reserves[0].valueOf(), 1999)
+  //     assert.equal(reserves[1].valueOf(), 1999)
+  //   })
+  // });
   describe('#withdraw liquidity with sone covert', async () => {
     beforeEach(async () => {
       await this.factory.setSoneConvert(this.soneConvert.address, { from: owner })
@@ -86,7 +86,7 @@ contract('liquidity', ([alice, bob, owner]) => {
       await this.token0.mint(bob, 10000000)
       await this.token1.mint(bob, 10000000)
     })
-    it('fee to', async () => {
+    it('return 2 token from convert', async () => {
       await this.token0.transfer(this.pair.address, '1000000', { from: alice })
       await this.token1.transfer(this.pair.address, '1000000', { from: alice })
       await this.pair.mint(alice, { from: alice })
@@ -104,18 +104,19 @@ contract('liquidity', ([alice, bob, owner]) => {
 
       let totalSupplyLiquid = (await this.pair.totalSupply()).valueOf()
 
-      await this.pair.transfer(this.pair.address, 1000000, { from: bob})
+      await this.pair.transfer(this.pair.address, '1000000', { from: bob}) 
       await this.pair.burn(bob, { from: bob })
       await this.soneConvert.convertToSone(
         this.token0.address,
         this.token1.address,
-        BN(1000000),
-        totalSupplyLiquid,
-        bob
+        '1000000',
+        totalSupplyLiquid.toString(),
+        bob,
+        { from: bob }
       )
 
-      assert.equal((await this.token0.balanceOf(bob)).valueOf(), 10009496)
-      assert.equal((await this.token1.balanceOf(bob)).valueOf(), 9990619)
+      assert.equal((await this.token0.balanceOf(bob)).valueOf(), 10009496) // 10009496 + 2 (from convert)
+      assert.equal((await this.token1.balanceOf(bob)).valueOf(), 9990619) // 9990618 + 1 (from convert)
     })
   })
 })
