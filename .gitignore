@@ -1,11 +1,9 @@
 /node_modules/
 /build/
-/builds/
 .DS_Store
 *.log
 zscript
 .idea
 .vscode
 
-truffle-config.js
 .env
