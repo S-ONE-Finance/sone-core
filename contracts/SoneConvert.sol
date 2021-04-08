@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./uniswapv2/interfaces/IUniswapV2Pair.sol";
 import "./uniswapv2/interfaces/IUniswapV2Factory.sol";
-import "./uniswapv2/interfaces/IUniswapV2Router02.sol";
+import "./uniswapv2/interfaces/ISoneSwapRouter.sol";
 
 contract SoneConvert {
     using SafeMath for uint256;
@@ -14,19 +14,19 @@ contract SoneConvert {
     address public sone;
     address public weth;
     IUniswapV2Factory public factory;
-    IUniswapV2Router02 public routerv2;
+    ISoneSwapRouter public soneSwapRouter;
     bytes4 private constant SELECTOR = bytes4(keccak256(bytes("transfer(address,uint256)")));
 
     constructor(
         address _sone,
         address _weth,
         IUniswapV2Factory _factory,
-        IUniswapV2Router02 _routerv2
+        ISoneSwapRouter _soneSwapRouter
     ) public {
         sone = _sone;
         weth = _weth;
         factory = _factory;
-        routerv2 = _routerv2;
+        soneSwapRouter = _soneSwapRouter;
     }
 
     function convertToSone(
@@ -59,8 +59,8 @@ contract SoneConvert {
         address token0 = pair.token0();
         address token1 = pair.token1();
 
-        _safeApproveForRouterV2(token0);
-        _safeApproveForRouterV2(token1);
+        _safeApproveForsoneSwapRouter(token0);
+        _safeApproveForsoneSwapRouter(token1);
 
         // swap token to sone/weth
         _toBaseToken(token0, amount0);
@@ -83,7 +83,7 @@ contract SoneConvert {
             }
             // swap weth to sone
             if (IERC20(weth).balanceOf(address(this)) > 0) {
-                _safeApproveForRouterV2(weth);
+                _safeApproveForsoneSwapRouter(weth);
                 _swap(weth, sone, IERC20(weth).balanceOf(address(this)));
             }
 
@@ -122,7 +122,7 @@ contract SoneConvert {
             address[] memory path = new address[](2);
             path[0] = token0;
             path[1] = token1;
-            routerv2.swapExactTokensForTokensNoFee(
+            soneSwapRouter.swapExactTokensForTokensNoFee(
                 amountIn,
                 0,
                 path,
@@ -132,9 +132,9 @@ contract SoneConvert {
         }
     }
 
-    function _safeApproveForRouterV2(address token) internal {
-        IERC20(token).safeApprove(address(routerv2), 0);
-        IERC20(token).safeApprove(address(routerv2), uint256(-1));
+    function _safeApproveForsoneSwapRouter(address token) internal {
+        IERC20(token).safeApprove(address(soneSwapRouter), 0);
+        IERC20(token).safeApprove(address(soneSwapRouter), uint256(-1));
     }
 
     function _safeTransfer(address token, address to, uint value) internal {
