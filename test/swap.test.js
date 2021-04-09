@@ -60,28 +60,28 @@ contract('swap', ([alice, bob, owner]) => {
       assert.equal(reserves[0].valueOf(), 1001000)
       assert.equal(reserves[1].valueOf(), (BN(1000000) - amountOut).toString())
     })
-    // it('swap exact token2', async () => {
-    //   await this.token1.mint(bob, 1000000)
-    //   assert.equal((await this.token1.balanceOf(bob)).valueOf(), 1000000)
+    it('swap exact token2', async () => {
+      await this.token0.mint(bob, 1000000)
+      assert.equal((await this.token0.balanceOf(bob)).valueOf(), 1000000)
   
-    //   const amountIn = getAmountIn(BN(1000), BN(1000000), BN(1000000), BN(this.swapFee))
-    //   assert.equal(amountIn, 1005) // 1005.01304
+      const amountIn = getAmountIn(BN(1000), BN(1000000), BN(1000000), BN(this.swapFee))
+      assert.equal(amountIn, 1005) // 1005.01304
   
-    //   await this.token1.approve(this.router.address, 1000, { from: bob })
-    //     await this.router.swapTokensForExactTokens(
-    //       1000,
-    //       1000000,
-    //       [this.token0.address, this.token1.address],
-    //       bob,
-    //       11571287987,
-    //       { from: bob }  
-    //     )
-    //   assert.equal((await this.token0.balanceOf(bob)).valueOf(), BN(1000000).sub(amountIn).toString())
-    //   assert.equal((await this.token1.balanceOf(bob)).valueOf(), 1000)
+      await this.token0.approve(this.router.address, 1000000, { from: bob })
+        await this.router.swapTokensForExactTokens(
+          1000,
+          1000000,
+          [this.token0.address, this.token1.address],
+          bob,
+          11571287987,
+          { from: bob }  
+        )
+      assert.equal((await this.token0.balanceOf(bob)).valueOf(), BN(1000000).sub(amountIn).toString())
+      assert.equal((await this.token1.balanceOf(bob)).valueOf(), 1000)
       
-    //   const reserves = await this.pair.getReserves()
-    //   assert.equal(reserves[0].valueOf(), (BN(1000000).add(amountIn)).toString())
-    //   assert.equal(reserves[1].valueOf(), 999000)
-    // })
+      const reserves = await this.pair.getReserves()
+      assert.equal(reserves[0].valueOf(), (BN(1000000).add(amountIn)).toString())
+      assert.equal(reserves[1].valueOf(), 999000)
+    })
   })
 })

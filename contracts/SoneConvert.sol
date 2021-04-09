@@ -118,7 +118,8 @@ contract SoneConvert {
         address token1,
         uint256 amountIn
     ) internal {
-        if (factory.getPair(token0, token1) != address(0)) {
+        if(token0 == weth && token1 != sone) return;
+        if (factory.getPair(token0, token1) != address(0) && amountIn > 0) {
             address[] memory path = new address[](2);
             path[0] = token0;
             path[1] = token1;
