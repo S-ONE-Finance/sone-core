@@ -161,6 +161,26 @@ contract SoneSwapRouter is UniswapV2Router02{
         require(amountB >= amountBMin, 'UniswapV2Router: INSUFFICIENT_B_AMOUNT');
     }
 
+    function addLiquidityOneToken(
+        address tokenA,
+        address tokenB,
+        uint amountADesired,
+        uint amountAMin,
+        unit amountBMin,
+        address to,
+        uint deadline
+    ) external virtual override ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
+        address[] memory path = new address[](2);
+            path[0] = tokenA;
+            path[1] = tokenB;
+        uint[] memory amounts = swapExactTokensForTokens(amountADesired.div(2), amountBMin, path, to, deadline);
+        (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
+        address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
+        TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
+        TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
+        liquidity = IUniswapV2Pair(pair).mint(to);
+    }
+
     function _convert(address tokenA, address tokenB, uint liquidity, uint totalSupply, address to) internal{
         if(IUniswapV2Factory(factory).soneConvert() != address(0)){
             ISoneConvert(IUniswapV2Factory(factory).soneConvert()).convertToSone(
