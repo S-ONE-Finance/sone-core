@@ -74,7 +74,7 @@ contract('swap', ([alice, bob, owner]) => {
           [this.token0.address, this.token1.address],
           bob,
           11571287987,
-          { from: bob }  
+          { from: bob }
         )
       assert.equal((await this.token0.balanceOf(bob)).valueOf(), BN(1000000).sub(amountIn).toString())
       assert.equal((await this.token1.balanceOf(bob)).valueOf(), 1000)

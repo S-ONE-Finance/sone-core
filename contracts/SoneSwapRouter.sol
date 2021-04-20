@@ -164,22 +164,51 @@ contract SoneSwapRouter is UniswapV2Router02{
     function addLiquidityOneToken(
         address tokenA,
         address tokenB,
-        uint amountADesired,
+        uint amountIn,
         uint amountAMin,
-        unit amountBMin,
+        uint amountBMin,
+        unit amountOutMin,
         address to,
         uint deadline
     ) external virtual override ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
         address[] memory path = new address[](2);
             path[0] = tokenA;
             path[1] = tokenB;
-        uint[] memory amounts = swapExactTokensForTokens(amountADesired.div(2), amountBMin, path, to, deadline);
-        (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
-        address pair = UniswapV2Library.pairFor(factory, tokenA, tokenB);
-        TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
-        TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
-        liquidity = IUniswapV2Pair(pair).mint(to);
+        uint[] memory amounts = swapExactTokensForTokens(amountIn.div(2), amountOutMin, path, to, deadline);
+        (uint amountA, uint amountB, uint liquidity) = addLiquidity(tokenA, tokenB, amountIn.div(2), amounts[amounts.length-1], amountAMin, amountBMin, to, deadline);
     }
+
+    function addLiquidityOneTokenETHForToken(
+        address token,
+        uint amountTokenMin,
+        uint amountETHMin,
+        uint amountOutTokenMin,
+        address to,
+        uint deadline
+    ) external virtual override payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
+        address[] memory path = new address[](2);
+            path[0] = WETH;
+            path[1] = token;
+        uint[] memory amounts = swapExactETHForTokens{value: msg.value.div(2)}(amountOutTokenMin, path, to, deadline);
+        (uint amountToken, uint amountETH, uint liquidity) = addLiquidityETH{value: msg.value.div(2)}(token, amounts[amounts.length-1], amountTokenMin, amountETHMin, to, deadline);
+    }
+
+    function addLiquidityOneTokenForETH(
+        address token,
+        uint amountIn,
+        uint amountTokenMin,
+        uint amountETHMin,
+        uint amountOutETHMin,
+        address to,
+        uint deadline
+    ) external virtual override payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
+        address[] memory path = new address[](2);
+            path[0] = token;
+            path[1] = WETH;
+        uint[] memory amounts = swapExactTokensForETH(amountIn.div(2), amountOutMin, path, to, deadline);
+        (uint amountToken, uint amountETH, uint liquidity) = addLiquidityETH(token, amounts[amounts.length-1], amountTokenMin, amountETHMin, to, deadline);
+    }
+
 
     function _convert(address tokenA, address tokenB, uint liquidity, uint totalSupply, address to) internal{
         if(IUniswapV2Factory(factory).soneConvert() != address(0)){
