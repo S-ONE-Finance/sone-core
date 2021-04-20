@@ -178,7 +178,7 @@ contract SoneSwapRouter is UniswapV2Router02{
         (uint amountA, uint amountB, uint liquidity) = addLiquidity(tokenA, tokenB, amountIn.div(2), amounts[amounts.length-1], amountAMin, amountBMin, to, deadline);
     }
 
-    function addLiquidityOneTokenETHForToken(
+    function addLiquidityOneTokenETHExactETH(
         address token,
         uint amountTokenMin,
         uint amountETHMin,
@@ -193,7 +193,7 @@ contract SoneSwapRouter is UniswapV2Router02{
         (uint amountToken, uint amountETH, uint liquidity) = addLiquidityETH{value: msg.value.div(2)}(token, amounts[amounts.length-1], amountTokenMin, amountETHMin, to, deadline);
     }
 
-    function addLiquidityOneTokenForETH(
+    function addLiquidityOneTokenETHExactToken(
         address token,
         uint amountIn,
         uint amountTokenMin,
