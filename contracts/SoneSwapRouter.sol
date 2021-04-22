@@ -167,15 +167,33 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint amountIn,
         uint amountAMin,
         uint amountBMin,
-        unit amountOutMin,
+        uint amountOutMin,
         address to,
         uint deadline
-    ) external virtual override ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
+    ) external virtual ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
         address[] memory path = new address[](2);
-            path[0] = tokenA;
-            path[1] = tokenB;
-        uint[] memory amounts = swapExactTokensForTokens(amountIn.div(2), amountOutMin, path, to, deadline);
-        (uint amountA, uint amountB, uint liquidity) = addLiquidity(tokenA, tokenB, amountIn.div(2), amounts[amounts.length-1], amountAMin, amountBMin, to, deadline);
+        path[0] = tokenA;
+        path[1] = tokenB;
+        //
+        uint[] memory amounts = UniswapV2Library.getAmountsOut(factory, amountIn.div(2), path, IUniswapV2Factory(factory).swapFee());
+        require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+        TransferHelper.safeTransferFrom(
+            path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
+        );
+        _swap(amounts, path, to);
+        //
+        uint _amountTokenA = amountIn.div(2);
+        {
+            address _tokenA = tokenA;
+            address _tokenB = tokenB;
+            uint _amountAMin = amountAMin;
+            uint _amountBMin = amountBMin;
+            (amountA, amountB) = _addLiquidity(_tokenA, _tokenB, _amountTokenA, amounts[1], _amountAMin, _amountBMin);
+            address pair = UniswapV2Library.pairFor(factory, _tokenA, _tokenB);
+            TransferHelper.safeTransferFrom(_tokenA, msg.sender, pair, amountA);
+            TransferHelper.safeTransferFrom(_tokenB, msg.sender, pair, amountB);
+            liquidity = IUniswapV2Pair(pair).mint(to);
+        }
     }
 
     function addLiquidityOneTokenETHExactETH(
@@ -185,12 +203,33 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint amountOutTokenMin,
         address to,
         uint deadline
-    ) external virtual override payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
+    ) external virtual payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
         address[] memory path = new address[](2);
-            path[0] = WETH;
-            path[1] = token;
-        uint[] memory amounts = swapExactETHForTokens{value: msg.value.div(2)}(amountOutTokenMin, path, to, deadline);
-        (uint amountToken, uint amountETH, uint liquidity) = addLiquidityETH{value: msg.value.div(2)}(token, amounts[amounts.length-1], amountTokenMin, amountETHMin, to, deadline);
+        path[0] = WETH;
+        path[1] = token;
+        //
+        require(path[0] == WETH, 'UniswapV2Router: INVALID_PATH');
+        uint[] memory amounts = UniswapV2Library.getAmountsOut(factory, msg.value.div(2), path, IUniswapV2Factory(factory).swapFee());
+        require(amounts[amounts.length - 1] >= amountOutTokenMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+        IWETH(WETH).deposit{value: amounts[0]}();
+        assert(IWETH(WETH).transfer(UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]));
+        _swap(amounts, path, to);
+        //
+        (amountToken, amountETH) = _addLiquidity(
+            token,
+            WETH,
+            amounts[1],
+            msg.value.div(2),
+            amountTokenMin,
+            amountETHMin
+        );
+        address pair = UniswapV2Library.pairFor(factory, token, WETH);
+        TransferHelper.safeTransferFrom(token, msg.sender, pair, amountToken);
+        IWETH(WETH).deposit{value: amountETH}();
+        assert(IWETH(WETH).transfer(pair, amountETH));
+        liquidity = IUniswapV2Pair(pair).mint(to);
+        // refund dust eth, if any
+        if (msg.value.div(2) > amountETH) TransferHelper.safeTransferETH(msg.sender, msg.value.div(2) - amountETH);
     }
 
     function addLiquidityOneTokenETHExactToken(
@@ -201,12 +240,42 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint amountOutETHMin,
         address to,
         uint deadline
-    ) external virtual override payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
+    ) external virtual payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
         address[] memory path = new address[](2);
-            path[0] = token;
-            path[1] = WETH;
-        uint[] memory amounts = swapExactTokensForETH(amountIn.div(2), amountOutMin, path, to, deadline);
-        (uint amountToken, uint amountETH, uint liquidity) = addLiquidityETH(token, amounts[amounts.length-1], amountTokenMin, amountETHMin, to, deadline);
+        path[0] = token;
+        path[1] = WETH;
+        //
+        require(path[path.length - 1] == WETH, 'UniswapV2Router: INVALID_PATH');
+        uint[] memory amounts = UniswapV2Library.getAmountsOut(factory, amountIn.div(2), path, IUniswapV2Factory(factory).swapFee());
+        require(amounts[amounts.length - 1] >= amountOutETHMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+        TransferHelper.safeTransferFrom(
+            path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
+        );
+        _swap(amounts, path, address(this));
+        IWETH(WETH).withdraw(amounts[amounts.length - 1]);
+        TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
+        //
+        {
+            address _token = token;
+            uint _amountWETH = amountIn.div(2);
+            uint _amountTokenMin = amountTokenMin;
+            uint _amountETHMin = amountETHMin;
+            (amountToken, amountETH) = _addLiquidity(
+                _token,
+                WETH,
+                _amountWETH,
+                amounts[1],
+                _amountTokenMin,
+                _amountETHMin
+            );
+        }
+        address pair = UniswapV2Library.pairFor(factory, token, WETH);
+        TransferHelper.safeTransferFrom(token, msg.sender, pair, amountToken);
+        IWETH(WETH).deposit{value: amountETH}();
+        assert(IWETH(WETH).transfer(pair, amountETH));
+        liquidity = IUniswapV2Pair(pair).mint(to);
+        // refund dust eth, if any
+        if (amounts[1] > amountETH) TransferHelper.safeTransferETH(msg.sender, amounts[1] - amountETH);
     }
 
 
