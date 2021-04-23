@@ -8,6 +8,6 @@ const halvingAfterBlock = 720;
 
 module.exports = async function(deployer) {
     // await deployer.deploy(SoneToken, lockFromBlock, lockToBlock);
-    const sone = await SoneToken.deployed();
-    await deployer.deploy(SoneMasterFarmer, sone.address, devAddresses, rewardPerBlock, startBlock, halvingAfterBlock);
+    // const sone = await SoneToken.deployed();
+    // await deployer.deploy(SoneMasterFarmer, sone.address, devAddresses, rewardPerBlock, startBlock, halvingAfterBlock);
 };
