@@ -39,16 +39,16 @@ contract('liquidity 1 token', ([alice, bob, owner]) => {
 
         await this.token0.approve(this.router.address, 1000000, { from: bob })
         await this.token1.approve(this.router.address, 1000000, { from: bob })
-        await this.router.addLiquidityOneToken(
+        await this.router.addLiquidityOneTokenETHExactETH(
             this.token0.address,
-            this.token1.address,
-            1000000,
             0,
             0,
             0,
             bob,
             11571287987,
-            { from: bob }
+            { from: bob,
+              value: 1000000  
+            }
         )
 
         assert.equal((await this.pair.totalSupply()).valueOf(), 1000996)

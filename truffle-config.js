@@ -73,9 +73,9 @@ module.exports = {
     },
     rinkeby: {
       provider: () => new HDWalletProvider(
-        //  process.env.MNEMONIC,  // Using MNEMONIC or PRIVATE_KEY
-        process.env.OPERATOR_PRIVATE_KEY,
-        `https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
+         process.env.MNEMONIC,  // Using MNEMONIC or PRIVATE_KEY
+        // process.env.OPERATOR_PRIVATE_KEY,
+        `wss://rinkeby.infura.io/ws/v3/1ee30a55a9084dbb91741085ccc9df47`
       ),
       network_id: 4,                        // Rinkeby's id
       gas: process.env.GAS_LIMIT,           // Rinkeby has a lower block limit than mainnet 12,500,000. MAXIMUM Rinkeby Block GAS_LIMIT = 10,000,000

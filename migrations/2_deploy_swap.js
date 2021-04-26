@@ -1,5 +1,5 @@
 const UniswapV2Factory = artifacts.require("UniswapV2Factory");
-const UniswapV2Router02 = artifacts.require("UniswapV2Router02");
+const UniswapV2Router02 = artifacts.require("SoneSwapRouter");
 
 // address of fee setter
 const feeSetterAddress = "0xAe7fD93a1419dee1376c0b9E27C969E85679AFd2";
