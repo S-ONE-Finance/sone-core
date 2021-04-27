@@ -18,7 +18,7 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint deadline
     )
     external ensure(deadline) returns (uint[] memory amounts) {
-        amounts = UniswapV2Library.getAmountsOutNoFee(factory, amountIn, path);
+        amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path, 0);
         if(amounts[1] == 0) return new uint[](2);
         (address token0, address token1) = UniswapV2Library.sortTokens(path[0], path[1]);
         (uint reserve0, uint reserve1) = UniswapV2Library.getReserves(factory, path[0], path[1]);
@@ -116,27 +116,21 @@ contract SoneSwapRouter is UniswapV2Router02{
     }
 
     function addLiquidityOneToken(
-        address tokenA,
-        address tokenB,
         uint amountIn,
         uint amountAMin,
         uint amountBMin,
         uint amountOutMin,
+        address[] calldata path,
         address to,
         uint deadline
     ) external virtual ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
-        address[] memory path = new address[](2);
-        path[0] = tokenA;
-        path[1] = tokenB;
         uint _amountTokenIn = amountIn.div(2);
-        address _to = to;
-        address _tokenA = tokenA;
-        address _tokenB = tokenB;
         uint[] memory amounts = _swapExactTokensForTokensOneMode(_amountTokenIn, amountOutMin, path, to, deadline);
+        address _to = to;
         {
         uint _amountAMin = amountAMin;
         uint _amountBMin = amountBMin;
-        (amountA, amountB, liquidity) = _addLiquidityOneMode(_tokenA, _tokenB, _amountTokenIn, amounts[amounts.length-1], _amountAMin, _amountBMin, _to);
+        (amountA, amountB, liquidity) = _addLiquidityOneMode(path[0], path[1], _amountTokenIn, amounts[amounts.length-1], _amountAMin, _amountBMin, _to);
         }
     }
 
@@ -145,12 +139,10 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint amountTokenMin,
         uint amountETHMin,
         uint amountOutTokenMin,
+        address[] calldata path,
         address to,
         uint deadline
     ) external virtual payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
-        address[] memory path = new address[](2);
-        path[0] = WETH;
-        path[1] = token;
         uint[] memory amounts = _swapExactETHForTokensOneMode(msg.value.div(2), amountOutTokenMin, path, to);
         (amountToken, amountETH, liquidity) = _addLiquidityETHOneMode(token, amounts[amounts.length-1], msg.value.div(2), amountTokenMin, amountETHMin, to);
     }
@@ -161,14 +153,19 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint amountTokenMin,
         uint amountETHMin,
         uint amountOutETHMin,
+        address[] calldata path,
         address to,
         uint deadline
     ) external virtual payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
-        address[] memory path = new address[](2);
-            path[0] = token;
-            path[1] = WETH;
-        uint[] memory amounts = _swapExactTokensForETHOneMode(amountIn.div(2), amountOutETHMin, path, to, deadline);
-        (amountToken, amountETH, liquidity) = _addLiquidityETHOneMode(token, amounts[amounts.length-1], amountTokenMin, amounts[1], amountETHMin, to);
+        uint _amountIn = amountIn.div(2);
+        uint[] memory amounts = _swapExactTokensForETHOneMode(_amountIn, amountOutETHMin, path, to, deadline);
+        {
+        address _token = token;
+        address _to = to;
+        uint _amountTokenMin = amountTokenMin;
+        uint _amountETHMin = amountETHMin;
+        (amountToken, amountETH, liquidity) = _addLiquidityETHOneMode(_token, _amountIn, amounts[1], _amountTokenMin, _amountETHMin, _to);
+        }
     }
 
 
@@ -187,7 +184,7 @@ contract SoneSwapRouter is UniswapV2Router02{
     function _swapExactTokensForTokensOneMode(
         uint amountIn,
         uint amountOutMin,
-        address[] memory path,
+        address[] calldata path,
         address to,
         uint deadline
     ) private ensure(deadline) returns (uint[] memory amounts) {
@@ -218,7 +215,7 @@ contract SoneSwapRouter is UniswapV2Router02{
     function _swapExactETHForTokensOneMode(
         uint amountETHMin,
         uint amountOutMin, 
-        address[] memory path, 
+        address[] calldata path, 
         address to
     ) private returns (uint[] memory amounts)
     {
@@ -255,7 +252,7 @@ contract SoneSwapRouter is UniswapV2Router02{
         if (amountETHDesired > amountETH) TransferHelper.safeTransferETH(msg.sender, amountETHDesired - amountETH);
     }
 
-    function _swapExactTokensForETHOneMode(uint amountIn, uint amountOutMin, address[] memory path, address to, uint deadline)
+    function _swapExactTokensForETHOneMode(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
         private
         ensure(deadline)
         returns (uint[] memory amounts)

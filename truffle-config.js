@@ -80,7 +80,7 @@ module.exports = {
       network_id: 4,                        // Rinkeby's id
       gas: process.env.GAS_LIMIT,           // Rinkeby has a lower block limit than mainnet 12,500,000. MAXIMUM Rinkeby Block GAS_LIMIT = 10,000,000
       gasPrice: process.env.GAS_PRICE,      // Default gasPrice to send a transaction
-      confirmations: 2,                     // # of confs to wait between deployments. (default: 0)
+      confirmations: 1,                     // # of confs to wait between deployments. (default: 0)
       timeoutBlocks: 200,                   // # of blocks before a deployment times out  (minimum/default: 50)
       from: process.env.OPERATOR_ADDRESS,   // Send transactions from Operator Address
       skipDryRun: true                      // Skip dry run before migrations? (default: false for public nets )
