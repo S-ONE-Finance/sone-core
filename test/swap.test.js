@@ -57,8 +57,14 @@ contract('swap', ([alice, bob, owner]) => {
       assert.equal((await this.token1.balanceOf(bob)).valueOf(), amountOut.toString())
       
       const reserves = await this.pair.getReserves()
-      assert.equal(reserves[0].valueOf(), 1001000)
-      assert.equal(reserves[1].valueOf(), (BN(1000000) - amountOut).toString())
+      if (this.token0.address < this.token1.address){
+        assert.equal(reserves[0].valueOf(), 1001000)
+        assert.equal(reserves[1].valueOf(), (BN(1000000) - amountOut).toString())
+      }else{
+        assert.equal(reserves[1].valueOf(), 1001000)
+        assert.equal(reserves[0].valueOf(), (BN(1000000) - amountOut).toString())
+      }
+    
     })
     it('swap exact token2', async () => {
       await this.token0.mint(bob, 1000000)
@@ -80,8 +86,13 @@ contract('swap', ([alice, bob, owner]) => {
       assert.equal((await this.token1.balanceOf(bob)).valueOf(), 1000)
       
       const reserves = await this.pair.getReserves()
-      assert.equal(reserves[0].valueOf(), (BN(1000000).add(amountIn)).toString())
-      assert.equal(reserves[1].valueOf(), 999000)
+      if (this.token0.address < this.token1.address){
+        assert.equal(reserves[0].valueOf(), (BN(1000000).add(amountIn)).toString())
+        assert.equal(reserves[1].valueOf(), 999000)
+      }else{
+        assert.equal(reserves[1].valueOf(), (BN(1000000).add(amountIn)).toString())
+        assert.equal(reserves[0].valueOf(), 999000)
+      }
     })
   })
 })
