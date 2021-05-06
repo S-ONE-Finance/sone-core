@@ -6,9 +6,7 @@ import './uniswapv2/UniswapV2Router02.sol';
 contract SoneSwapRouter is UniswapV2Router02{
     constructor(address factory_, address WETH_) 
         UniswapV2Router02 (factory_, WETH_)
-        public {
-            
-        }
+        public {}
 
     function swapExactTokensForTokensNoFee(
         uint amountIn,
@@ -135,7 +133,6 @@ contract SoneSwapRouter is UniswapV2Router02{
     }
 
     function addLiquidityOneTokenETHExactETH(
-        address token,
         uint amountTokenMin,
         uint amountETHMin,
         uint amountOutTokenMin,
@@ -144,11 +141,10 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint deadline
     ) external virtual payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
         uint[] memory amounts = _swapExactETHForTokensOneMode(msg.value.div(2), amountOutTokenMin, path, to);
-        (amountToken, amountETH, liquidity) = _addLiquidityETHOneMode(token, amounts[amounts.length-1], msg.value.div(2), amountTokenMin, amountETHMin, to);
+        (amountToken, amountETH, liquidity) = _addLiquidityETHOneMode(path[1], amounts[amounts.length-1], msg.value.div(2), amountTokenMin, amountETHMin, to);
     }
 
     function addLiquidityOneTokenETHExactToken(
-        address token,
         uint amountIn,
         uint amountTokenMin,
         uint amountETHMin,
@@ -160,11 +156,10 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint _amountIn = amountIn.div(2);
         uint[] memory amounts = _swapExactTokensForETHOneMode(_amountIn, amountOutETHMin, path, to, deadline);
         {
-        address _token = token;
         address _to = to;
         uint _amountTokenMin = amountTokenMin;
         uint _amountETHMin = amountETHMin;
-        (amountToken, amountETH, liquidity) = _addLiquidityETHOneMode(_token, _amountIn, amounts[1], _amountTokenMin, _amountETHMin, _to);
+        (amountToken, amountETH, liquidity) = _addLiquidityETHOneMode(path[0], _amountIn, amounts[1], _amountTokenMin, _amountETHMin, _to);
         }
     }
 
@@ -265,6 +260,6 @@ contract SoneSwapRouter is UniswapV2Router02{
         );
         _swap(amounts, path, address(this));
         IWETH(WETH).withdraw(amounts[amounts.length - 1]);
-        TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
+        // TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
     }
 }
