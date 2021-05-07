@@ -49,7 +49,8 @@ contract('liquidity 1 token', ([alice, bob, owner]) => {
             { from: bob
             }
         )
-
+        assert.equal((await this.token0.balanceOf(bob)).valueOf(), 10000000-1000-997)
+        assert.equal((await this.token1.balanceOf(bob)).valueOf(), 0)
         assert.equal((await this.pair.totalSupply()).valueOf(), 1000996)
         assert.equal((await this.pair.balanceOf(bob)).valueOf(), 996)
         const reserves = await this.pair.getReserves() // [token1, token0]
@@ -97,6 +98,9 @@ contract('liquidity 1 token', ([alice, bob, owner]) => {
               value: 2000
             }
         )
+
+        assert.equal((await this.token0.balanceOf(bob)).valueOf(), 0)
+
         const tx = await web3.eth.getTransaction(txAddLiquid.tx);
         const gasPrice = tx.gasPrice;
         const fee = txAddLiquid.receipt.gasUsed * gasPrice;
@@ -107,13 +111,13 @@ contract('liquidity 1 token', ([alice, bob, owner]) => {
 
         assert.equal((await this.pair.totalSupply()).valueOf(), 1000996)
         assert.equal((await this.pair.balanceOf(bob)).valueOf(), 996)
-        const reserves = await this.pair.getReserves() // [token0, weth]
+        const reserves = await this.pair.getReserves() // [weth, token0]
         if (this.weth.address < this.token0.address){
-          assert.equal(reserves[0].valueOf(), 1001997)  // balance0 = 1000000(add 1)+1000(swap)+997(add 2)
-          assert.equal(reserves[1].valueOf(), 1000000) // balance1 = 1000000(add 1)-996(swap)+996(add 2)
+          assert.equal(reserves[0].valueOf(), 1001997)  // balanceWETH = 1000000(add 1)+1000(swap)+997(add 2)
+          assert.equal(reserves[1].valueOf(), 1000000) // balance0 = 1000000(add 1)-996(swap)+996(add 2)
         }else{
           assert.equal(reserves[1].valueOf(), 1001997)  // balanceWETH = 1000000(add 1)+1000(swap)+997(add 2)
-          assert.equal(reserves[0].valueOf(), 1000000) // balance1 = 1000000(add 1)-996(swap)+996(add 2)
+          assert.equal(reserves[0].valueOf(), 1000000) // balance0 = 1000000(add 1)-996(swap)+996(add 2)
         }
     })
   });
@@ -139,7 +143,7 @@ contract('liquidity 1 token', ([alice, bob, owner]) => {
     it('mint', async () => {
         await this.token0.mint(bob, 10000000)
         await this.token0.approve(this.router.address, 1000000, { from: bob })
-        // const balanceBeforeAdd = await web3.eth.getBalance(bob);
+        const balanceBeforeAdd = await web3.eth.getBalance(bob);
         const txAddLiquid = await this.router.addLiquidityOneTokenETHExactToken(
             2000,
             0,
@@ -152,24 +156,25 @@ contract('liquidity 1 token', ([alice, bob, owner]) => {
               from: bob
             }
         )
-        // const tx = await web3.eth.getTransaction(txAddLiquid.tx);
-        // const gasPrice = tx.gasPrice;
-        // const fee = txAddLiquid.receipt.gasUsed * gasPrice;
-        // const balanceAfterAdd = await web3.eth.getBalance(bob);
+        const tx = await web3.eth.getTransaction(txAddLiquid.tx);
+        const gasPrice = tx.gasPrice;
+        const fee = txAddLiquid.receipt.gasUsed * gasPrice;
+        const balanceAfterAdd = await web3.eth.getBalance(bob);
 
-        // const value = BN(balanceBeforeAdd).sub(BN(balanceAfterAdd)).sub(BN(fee));
-        // assert.equal(value.valueOf(), 1997) // 1000(swap) + 997 (add)
+        const value = BN(balanceBeforeAdd).sub(BN(balanceAfterAdd)).sub(BN(fee));
+        assert.equal(value.valueOf(), 0)
+        assert.equal((await this.token1.balanceOf(bob)).valueOf(), 0)
 
         assert.equal((await this.pair.totalSupply()).valueOf(), 1000996)
         assert.equal((await this.pair.balanceOf(bob)).valueOf(), 996)
-        // const reserves = await this.pair.getReserves() // [token0, weth]
-        // if (this.weth.address < this.token0.address){
-        //   assert.equal(reserves[0].valueOf(), 1001997)  // balance0 = 1000000(add 1)+1000(swap)+997(add 2)
-        //   assert.equal(reserves[1].valueOf(), 1000000) // balance1 = 1000000(add 1)-996(swap)+996(add 2)
-        // }else{
-        //   assert.equal(reserves[1].valueOf(), 1001997)  // balanceWETH = 1000000(add 1)+1000(swap)+997(add 2)
-        //   assert.equal(reserves[0].valueOf(), 1000000) // balance1 = 1000000(add 1)-996(swap)+996(add 2)
-        // }
+        const reserves = await this.pair.getReserves() // [token0, weth]
+        if (this.token0.address < this.weth.address){
+          assert.equal(reserves[0].valueOf(), 1001997)  // balance0 = 1000000(add 1)+1000(swap)+997(add 2)
+          assert.equal(reserves[1].valueOf(), 1000000) // balanceWETH = 1000000(add 1)-996(swap)+996(add 2)
+        }else{
+          assert.equal(reserves[1].valueOf(), 1001997)  // balance0 = 1000000(add 1)+1000(swap)+997(add 2)
+          assert.equal(reserves[0].valueOf(), 1000000) // balanceWETH = 1000000(add 1)-996(swap)+996(add 2)
+        }
     })
   });
 })

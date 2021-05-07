@@ -154,7 +154,7 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint deadline
     ) external virtual payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
         uint _amountIn = amountIn.div(2);
-        uint[] memory amounts = _swapExactTokensForETHOneMode(_amountIn, amountOutETHMin, path, to);
+        uint[] memory amounts = _swapExactTokensForETHOneMode(_amountIn, amountOutETHMin, path);
         {
         address _to = to;
         uint _amountTokenMin = amountTokenMin;
@@ -246,7 +246,7 @@ contract SoneSwapRouter is UniswapV2Router02{
         if (amountETHDesired > amountETH) TransferHelper.safeTransferETH(msg.sender, amountETHDesired - amountETH);
     }
 
-    function _swapExactTokensForETHOneMode(uint amountIn, uint amountOutMin, address[] calldata path, address to)
+    function _swapExactTokensForETHOneMode(uint amountIn, uint amountOutMin, address[] calldata path)
         private
         returns (uint[] memory amounts)
     {
