@@ -22,7 +22,7 @@ contract SoneSwapRouter is UniswapV2Router02{
         (uint reserve0, uint reserve1) = UniswapV2Library.getReserves(factory, path[0], path[1]);
         if(token0 == path[1] && reserve0 < amounts[1]) return new uint[](2);
         if(token1 == path[1] && reserve1 < amounts[1]) return new uint[](2);
-        require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+        require(amounts[1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
@@ -123,12 +123,12 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint deadline
     ) external virtual ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
         uint _amountTokenIn = amountIn.div(2);
-        uint[] memory amounts = _swapExactTokensForTokensOneMode(_amountTokenIn, amountOutMin, path, to, deadline);
+        uint[] memory amounts = _swapExactTokensForTokensOneMode(_amountTokenIn, amountOutMin, path, to);
         address _to = to;
         {
         uint _amountAMin = amountAMin;
         uint _amountBMin = amountBMin;
-        (amountA, amountB, liquidity) = _addLiquidityOneMode(path[0], path[1], _amountTokenIn, amounts[amounts.length-1], _amountAMin, _amountBMin, _to);
+        (amountA, amountB, liquidity) = _addLiquidityOneMode(path[0], path[1], _amountTokenIn, amounts[1], _amountAMin, _amountBMin, _to);
         }
     }
 
@@ -141,7 +141,7 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint deadline
     ) external virtual payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
         uint[] memory amounts = _swapExactETHForTokensOneMode(msg.value.div(2), amountOutTokenMin, path, to);
-        (amountToken, amountETH, liquidity) = _addLiquidityETHOneMode(path[1], amounts[amounts.length-1], msg.value.div(2), amountTokenMin, amountETHMin, to);
+        (amountToken, amountETH, liquidity) = _addLiquidityETHOneMode(path[1], amounts[1], msg.value.div(2), amountTokenMin, amountETHMin, to);
     }
 
     function addLiquidityOneTokenETHExactToken(
@@ -154,7 +154,7 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint deadline
     ) external virtual payable ensure(deadline) returns (uint amountToken, uint amountETH, uint liquidity) {
         uint _amountIn = amountIn.div(2);
-        uint[] memory amounts = _swapExactTokensForETHOneMode(_amountIn, amountOutETHMin, path, to, deadline);
+        uint[] memory amounts = _swapExactTokensForETHOneMode(_amountIn, amountOutETHMin, path, to);
         {
         address _to = to;
         uint _amountTokenMin = amountTokenMin;
@@ -180,11 +180,10 @@ contract SoneSwapRouter is UniswapV2Router02{
         uint amountIn,
         uint amountOutMin,
         address[] calldata path,
-        address to,
-        uint deadline
-    ) private ensure(deadline) returns (uint[] memory amounts) {
+        address to
+    ) private returns (uint[] memory amounts) {
         amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path, IUniswapV2Factory(factory).swapFee());
-        require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+        require(amounts[1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
@@ -216,7 +215,7 @@ contract SoneSwapRouter is UniswapV2Router02{
     {
         require(path[0] == WETH, 'UniswapV2Router: INVALID_PATH');
         amounts = UniswapV2Library.getAmountsOut(factory, amountETHMin, path, IUniswapV2Factory(factory).swapFee());
-        require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+        require(amounts[1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
         IWETH(WETH).deposit{value: amounts[0]}();
         assert(IWETH(WETH).transfer(UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
@@ -247,19 +246,17 @@ contract SoneSwapRouter is UniswapV2Router02{
         if (amountETHDesired > amountETH) TransferHelper.safeTransferETH(msg.sender, amountETHDesired - amountETH);
     }
 
-    function _swapExactTokensForETHOneMode(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
+    function _swapExactTokensForETHOneMode(uint amountIn, uint amountOutMin, address[] calldata path, address to)
         private
-        ensure(deadline)
         returns (uint[] memory amounts)
     {
-        require(path[path.length - 1] == WETH, 'UniswapV2Router: INVALID_PATH');
+        require(path[1] == WETH, 'UniswapV2Router: INVALID_PATH');
         amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path, IUniswapV2Factory(factory).swapFee());
-        require(amounts[amounts.length - 1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
+        require(amounts[1] >= amountOutMin, 'UniswapV2Router: INSUFFICIENT_OUTPUT_AMOUNT');
         TransferHelper.safeTransferFrom(
             path[0], msg.sender, UniswapV2Library.pairFor(factory, path[0], path[1]), amounts[0]
         );
         _swap(amounts, path, address(this));
-        IWETH(WETH).withdraw(amounts[amounts.length - 1]);
-        // TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
+        IWETH(WETH).withdraw(amounts[1]);
     }
 }

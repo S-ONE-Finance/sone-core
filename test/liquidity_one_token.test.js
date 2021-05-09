@@ -87,7 +87,6 @@ contract('liquidity 1 token', ([alice, bob, owner]) => {
         await this.token0.approve(this.router.address, 1000000, { from: bob })
         const balanceBeforeAdd = await web3.eth.getBalance(bob);
         const txAddLiquid = await this.router.addLiquidityOneTokenETHExactETH(
-            this.token0.address,
             0,
             0,
             0,
@@ -142,7 +141,6 @@ contract('liquidity 1 token', ([alice, bob, owner]) => {
         await this.token0.approve(this.router.address, 1000000, { from: bob })
         // const balanceBeforeAdd = await web3.eth.getBalance(bob);
         const txAddLiquid = await this.router.addLiquidityOneTokenETHExactToken(
-            this.token0.address,
             2000,
             0,
             0,
