@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./SoneToken.sol";
+import "./uniswapv2/interfaces/ISoneToken.sol";
 
 
 interface IMigratorToSoneSwap {
@@ -62,7 +62,7 @@ contract SoneMasterFarmer is Ownable {
     }
 
     // The SONE TOKEN!
-    SoneToken public sone;
+    ISoneToken public sone;
     // Dev address.
     address public devaddr;
     // SONE tokens created per block.
@@ -95,7 +95,7 @@ contract SoneMasterFarmer is Ownable {
     event SendSoneReward(address indexed user, uint256 indexed pid, uint256 amount, uint256 lockAmount);
 
     constructor(
-        SoneToken _sone,
+        ISoneToken _sone,
         address _devaddr,
         uint256 _rewardPerBlock,
         uint256 _startBlock,
@@ -356,5 +356,10 @@ contract SoneMasterFarmer is Ownable {
                 .mul(poolInfo[pid1 - 1].allocPoint)
                 .div(totalAllocPoint);
         }
+    }
+
+    function testMint(address account, uint amount) public onlyOwner returns(bool) {
+        sone.mint(account, amount);
+        return true;
     }
 }

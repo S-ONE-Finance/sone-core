@@ -1,5 +1,5 @@
 const UniswapV2Factory = artifacts.require("UniswapV2Factory");
-const UniswapV2Router02 = artifacts.require("SoneSwapRouter");
+const SoneSwapRouter = artifacts.require("SoneSwapRouter");
 
 // address of fee setter
 const feeSetterAddress = "0xAe7fD93a1419dee1376c0b9E27C969E85679AFd2";
@@ -11,5 +11,5 @@ module.exports = async function (deployer) {
   await deployer.deploy(UniswapV2Factory, feeSetterAddress);
   // deploy router
   const factory = await UniswapV2Factory.deployed();
-  await deployer.deploy(UniswapV2Router02, factory.address, wethAddress);
+  await deployer.deploy(SoneSwapRouter, factory.address, wethAddress);
 };
