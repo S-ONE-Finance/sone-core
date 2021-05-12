@@ -1,4 +1,4 @@
-const reasonRevert = require("../helpers/exceptions.js").reasonRevert;
+const reasonRevert = require("../constants/exceptions.js").reasonRevert;
 const { expectRevert } = require('@openzeppelin/test-helpers');
 const UniswapV2Factory = artifacts.require('UniswapV2Factory')
 const UniswapV2Pair = artifacts.require('UniswapV2Pair')
