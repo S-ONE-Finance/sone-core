@@ -68,7 +68,7 @@ contract SoneMasterFarmer is Ownable {
     // SONE tokens created per block.
     uint256 public REWARD_PER_BLOCK;
     // Bonus muliplier for early SONE makers.
-    uint256[] public REWARD_MULTIPLIER = [128, 128, 64, 32, 16, 8, 4, 2, 1];
+    uint256[] public REWARD_MULTIPLIER = [32, 32, 32, 32, 16, 8, 4, 2, 1];
     uint256[] public HALVING_AT_BLOCK; // init in constructor function
     uint256 public FINISH_BONUS_AT_BLOCK;
 
@@ -357,9 +357,12 @@ contract SoneMasterFarmer is Ownable {
                 .div(totalAllocPoint);
         }
     }
-
-    function testMint(address account, uint amount) public onlyOwner returns(bool) {
+    // mint SONE token via MasterFarmer
+    function mintSoneToken(address account, uint amount) public onlyOwner{
         sone.mint(account, amount);
-        return true;
+    }
+    // transfer ownership SONE token
+    function transferOwnershipSoneToken(address newOwner) public onlyOwner {
+        sone.transferOwnership(newOwner);
     }
 }
