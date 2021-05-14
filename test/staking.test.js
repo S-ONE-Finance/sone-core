@@ -9,7 +9,7 @@ NOTE:
 
 
 require('dotenv').config();
-const reasonRevert = require("../helpers/exceptions.js").reasonRevert;
+const reasonRevert = require("../constants/exceptions.js").reasonRevert;
 const { expectRevert } = require('@openzeppelin/test-helpers');
 const UniswapV2Factory = artifacts.require('UniswapV2Factory')
 const UniswapV2Pair = artifacts.require('UniswapV2Pair')
@@ -55,6 +55,88 @@ contract('staking', ([alice, bob, owner]) => {
         assert.equal(pool1.allocPoint, 10)
     })
     it('exception not owner', async () => {
+      await expectRevert(this.soneMasterFarmer.add(
+        10,
+        this.pair.address,
+        true,
+        {from: alice}
+      ), reasonRevert.NOT_OWNER)
+    })
+    it('exception pool already exist', async () => {
+      await this.soneMasterFarmer.add(
+        10,
+        this.pair.address,
+        true,
+        {from: owner}
+    )
+      await expectRevert(this.soneMasterFarmer.add(
+        10,
+        this.pair.address,
+        true,
+        {from: owner}
+      ), reasonRevert.POOL_ALREADY_EXIT)
+    })
+  });
+  describe('#update pool', async () => {
+    beforeEach(async () => {
+      await this.soneMasterFarmer.add(
+        10,
+        this.pair.address,
+        true,
+        {from: owner}
+      )
+    })
+    it('success', async () => {
+      await this.soneMasterFarmer.set(
+        0,
+        20,
+        true,
+        {from: owner}
+      )
+      assert.equal((await this.soneMasterFarmer.poolLength()).valueOf(), 1)
+      assert.equal((await this.soneMasterFarmer.totalAllocPoint()).valueOf(), 20)
+      const pool1 = await this.soneMasterFarmer.poolInfo(0)
+      assert.equal(pool1.lpToken, this.pair.address)
+      assert.equal(pool1.allocPoint, 20)
+    })
+    it('exception not owner', async () => {
+      await expectRevert(this.soneMasterFarmer.set(
+        0,
+        10,
+        true,
+        {from: alice}
+      ), reasonRevert.NOT_OWNER)
+    })
+  });
+  describe('#deposit', async () => {
+    beforeEach(async () => {
+      await this.soneMasterFarmer.add(
+        10,
+        this.pair.address,
+        true,
+        {from: owner}
+      )
+      await this.token0.approve(this.router.address, 1000000, { from: alice })
+      await this.token1.approve(this.router.address, 1000000, { from: alice })
+      await this.router.addLiquidity(
+        this.token0.address,
+        this.token1.address,
+        1000000,
+        1000000,
+        0,
+        0,
+        alice,
+        11571287987,
+        { from: alice }
+      )
+    })
+    it('success', async () => {
+      await this.pair.approve(this.soneMasterFarmer.address, 999000)
+      await this.soneMasterFarmer.deposit(
+        0,
+        999000,
+        {from: alice}
+      )
 
     })
   });
