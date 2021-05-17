@@ -228,10 +228,14 @@ contract SoneMasterFarmer is Ownable {
         if (soneCanMint < amount) {
             forDev = 0;
             forFarmer = soneCanMint;
-        }
-        else {
-            forDev = amount.mul(PERCENT_FOR_DEV).div(100);
-            forFarmer = amount;
+        }else{
+            if (soneCanMint < amount.mul(PERCENT_FOR_DEV+100).div(100)){
+                forDev = 0;
+                forFarmer = amount;
+            }else{
+                forDev = amount.mul(PERCENT_FOR_DEV).div(100);
+                forFarmer = amount;
+            }
         }
     }
 
@@ -329,7 +333,7 @@ contract SoneMasterFarmer is Ownable {
         user.rewardDebt = 0;
     }
 
-    // Safe sushi transfer function, just in case if rounding error causes pool to not have enough SONEs.
+    // Safe sone transfer function, just in case if rounding error causes pool to not have enough SONEs.
     function safeSoneTransfer(address _to, uint256 _amount) internal {
         uint256 soneBal = sone.balanceOf(address(this));
         if (_amount > soneBal) {

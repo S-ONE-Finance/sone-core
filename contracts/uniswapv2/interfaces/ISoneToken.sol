@@ -12,6 +12,10 @@ interface ISoneToken {
     event WhitelistRemoved(address indexed account);
     event WhitelistRevoked(address indexed account);
 
+    function allowTransferOn() external view returns (uint256);
+    function lockFromBlock() external view returns (uint256);
+    function lockToBlock() external view returns (uint256);
+
     function circulatingSupply() external view returns (uint256);
     function totalLock() external view returns (uint256);
     function mint(address _to, uint256 _amount) external;
