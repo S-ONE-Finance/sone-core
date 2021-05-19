@@ -7,5 +7,7 @@ module.exports.reasonRevert = {
     POOL_ALREADY_EXIT                           : "SoneMasterFarmer::add: lp is already in pool",
     INVALID_AMOUNT_DEPOSIT                      : "SoneMasterFarmer::deposit: amount must be greater than 0",
     INVALID_AMOUNT_WITHDRAW                     : "SoneMasterFarmer::withdraw: not good",
-    NOT_DEV_ADDRESSS                            : "dev: wut?"
+    NOT_DEV_ADDRESSS                            : "dev: wut?",
+    NOT_EXIST_MIGRATOR                          : "migrate: no migrator",
+    MIGRATE_BAD                                 : "migrate: bad"
 }

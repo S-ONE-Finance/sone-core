@@ -22,7 +22,6 @@ const BigNumber = require('bn.js')
 var BN = (s) => new BigNumber(s.toString(), 10)
 
 contract('staking', ([alice, dev, owner]) => {
-  // set one time to test
   beforeEach(async () => {
     this.factory = await UniswapV2Factory.new(owner, { from: owner })
     this.token0 = await MockERC20.new('TOKEN0', 'TOKEN0', '10000000', { from: alice })
@@ -153,11 +152,11 @@ contract('staking', ([alice, dev, owner]) => {
       const balanceSoneTokenBefore = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({from: alice})
       const balanceSoneAliceBefore = await this.soneToken.methods.balanceOf(alice).call({from: alice})
       await this.pair.approve(this.soneMasterFarmer.address, 10000000, {from: alice})
-        await this.soneMasterFarmer.deposit(
-          0,
-          999000,
-          {from: alice}
-        )
+      await this.soneMasterFarmer.deposit(
+        0,
+        999000,
+        {from: alice}
+      )
       await this.soneMasterFarmer.deposit(
         0,
         1000000,
