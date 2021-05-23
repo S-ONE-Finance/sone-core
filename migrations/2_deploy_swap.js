@@ -9,7 +9,10 @@ module.exports = async function (deployer) {
   // deploy factory
   await deployer.deploy(
     UniswapV2Factory,
-    feeSetterAddress
+    feeSetterAddress,
+    // {
+    //   overwrite: false
+    // }
   );
 
   // deploy router
@@ -17,6 +20,9 @@ module.exports = async function (deployer) {
   await deployer.deploy(
     SoneSwapRouter,
     factory.address,
-    wethAddress
+    wethAddress,
+    // {
+    //   overwrite: false
+    // }
   );
 }

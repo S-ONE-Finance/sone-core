@@ -13,6 +13,10 @@ module.exports = async function (deployer) {
         devAddresses,
         rewardPerBlock,
         startBlock,
-        halvingAfterBlock
+        halvingAfterBlock,
+        // {
+        //     overwrite: false,
+        //     gas: Math.round(2682119 * 1.1) // Used Gas = 90.1% Gas Limit
+        // }
     );
 }
