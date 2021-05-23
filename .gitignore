@@ -1,9 +1,19 @@
+# Dependencies
 /node_modules/
-/build/
+
+# Build
+/build
+/builds
+
+# System
 .DS_Store
+
+# Runtime
 *.log
-zscript
+
+# IDE
 .idea
 .vscode
 
+# Privacy
 .env
