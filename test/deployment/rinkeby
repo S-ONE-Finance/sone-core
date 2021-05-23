@@ -1,0 +1,101 @@
+Starting migrations...
+======================
+> Network name:    'rinkeby'
+> Network id:      4
+> Block gas limit: 10000000 (0x989680)
+
+
+1_initial_migration.js
+======================
+
+   Deploying 'Migrations'
+   ----------------------
+   > transaction hash:    0xa6a9ae943e0149db89fc1487d7700602853bb71a73b1b01476a82a1963482470
+   > Blocks: 0            Seconds: 16
+   > contract address:    0x2e8d25afCF563C682789A583062ED59dA1CFb371
+   > block number:        8622933
+   > block timestamp:     1621579572
+   > account:             0x7ed08552a797B58CcC2D297FB6439103b3A73db5
+   > balance:             14.302513748
+   > gas used:            130486 (0x1fdb6)
+   > gas price:           150 gwei
+   > value sent:          0 ETH
+   > total cost:          0.0195729 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:           0.0195729 ETH
+
+
+2_deploy_swap.js
+================
+
+   Deploying 'UniswapV2Factory'
+   ----------------------------
+   > transaction hash:    0xfcf915beea4ef13a6d13746c98f94907bb8ed5070c708a3e6a409365c7c4fc69
+   > Blocks: 1            Seconds: 12
+   > contract address:    0x9526d373E54910CEf09007BfF2d08a04Cd77d21E
+   > block number:        8622935
+   > block timestamp:     1621579602
+   > account:             0x7ed08552a797B58CcC2D297FB6439103b3A73db5
+   > balance:             13.837976948
+   > gas used:            3051246 (0x2e8eee)
+   > gas price:           150 gwei
+   > value sent:          0 ETH
+   > total cost:          0.4576869 ETH
+
+
+   Deploying 'SoneSwapRouter'
+   --------------------------
+   > transaction hash:    0x35780f85fc4d30bcb135a46cf8ae316a10da70d85d992c7c5b1976a38b86aaa8
+   > Blocks: 0            Seconds: 8
+   > contract address:    0x2913279E91CA7dA545BBa9D9A57E55507A14D0EC
+   > block number:        8622936
+   > block timestamp:     1621579617
+   > account:             0x7ed08552a797B58CcC2D297FB6439103b3A73db5
+   > balance:             13.070792798
+   > gas used:            5114561 (0x4e0ac1)
+   > gas price:           150 gwei
+   > value sent:          0 ETH
+   > total cost:          0.76718415 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          1.22487105 ETH
+
+
+3_deploy_stake.js
+=================
+
+   Deploying 'SoneMasterFarmer'
+   ----------------------------
+   > transaction hash:    0x8ff6fd280ea52be57be4d2a65a5d491051e2e8b0752c23020cc344a05d884b81
+   > Blocks: 0            Seconds: 8
+   > contract address:    0xf067EB76080412fb6ce1eD1569ED4BE1DD992264
+   > block number:        8622938
+   > block timestamp:     1621579647
+   > account:             0x7ed08552a797B58CcC2D297FB6439103b3A73db5
+   > balance:             12.664190048
+   > gas used:            2682119 (0x28ed07)
+   > gas price:           150 gwei
+   > value sent:          0 ETH
+   > total cost:          0.40231785 ETH
+
+
+   > Saving migration to chain.
+   > Saving artifacts
+   -------------------------------------
+   > Total cost:          0.40231785 ETH
+
+
+Summary
+=======
+> Total deployments:   4
+> Final cost:          1.6467618 ETH
+
+
+✨  Done in 125.46s.
