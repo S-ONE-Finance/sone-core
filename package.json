@@ -5,7 +5,9 @@
   "main": "index.js",
   "files": [
     "build",
-    "contracts"
+    "contracts",
+    "test",
+    "constants"
   ],
   "license": "MIT",
   "repository": "https://github.com/S-ONE-Finance/soneswap-core.git",
