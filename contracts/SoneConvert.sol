@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./uniswapv2/interfaces/IUniswapV2Pair.sol";
 import "./uniswapv2/interfaces/IUniswapV2Factory.sol";
-import "./uniswapv2/interfaces/ISoneSwapRouter.sol";
+import "./interfaces/ISoneSwapRouter.sol";
 
 contract SoneConvert {
     using SafeMath for uint256;

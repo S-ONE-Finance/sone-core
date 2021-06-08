@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./uniswapv2/interfaces/ISoneToken.sol";
+import "./interfaces/ISoneToken.sol";
 
 
 interface IMigratorToSoneSwap {

@@ -116,7 +116,7 @@
 				"dweb:/ipfs/QmPYdme77UEP3oEqE4MvWnDH6Np76fmRHaa4LKYXrxLpYR"
 			]
 		},
-		"contracts/uniswapv2/interfaces/ISoneToken.sol": {
+		"contracts/interfaces/ISoneToken.sol": {
 			"keccak256": "0xe835395cfd57c5a2372eee6632f5de3a5470568a79f4825a55f5dcbd75b22327",
 			"license": "UNLICENSED",
 			"urls": [

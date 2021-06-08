@@ -1,6 +1,6 @@
 pragma solidity >=0.6.2;
 
-import './IUniswapV2Router02.sol';
+import '../uniswapv2/interfaces/IUniswapV2Router02.sol';
 
 interface ISoneSwapRouter is IUniswapV2Router02 {
     function swapExactTokensForTokensNoFee(
