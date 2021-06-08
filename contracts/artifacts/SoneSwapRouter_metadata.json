@@ -1247,7 +1247,7 @@
 				"dweb:/ipfs/QmQJxptsf5ba1NbavSKSYZLVWThv7yCW9fwrwanLK5joFg"
 			]
 		},
-		"contracts/uniswapv2/interfaces/ISoneConvert.sol": {
+		"contracts/interfaces/ISoneConvert.sol": {
 			"keccak256": "0x0673eb41e75e9a268ca22f2011a7b08954e8f9be4ce543e7d8ba3020d9db6e19",
 			"license": "MIT",
 			"urls": [

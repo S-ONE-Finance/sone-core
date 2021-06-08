@@ -8,7 +8,7 @@ import './libraries/TransferHelper.sol';
 import './interfaces/IUniswapV2Router02.sol';
 import './interfaces/IUniswapV2Factory.sol';
 import './interfaces/IWETH.sol';
-import "./interfaces/ISoneConvert.sol";
+import "../interfaces/ISoneConvert.sol";
 
 contract UniswapV2Router02 is IUniswapV2Router02 {
     using SafeMath for uint;
