@@ -1,15 +1,18 @@
 require('dotenv').config();
-const reasonRevert = require("./constants/exceptions.js").reasonRevert;
+// const BigNumber = require('bn.js')
 const { expectRevert } = require('@openzeppelin/test-helpers');
+
+const MockERC20 = artifacts.require('MockERC20')
+const WETH = artifacts.require('WETH9')
 const UniswapV2Factory = artifacts.require('UniswapV2Factory')
 const UniswapV2Pair = artifacts.require('UniswapV2Pair')
-const WETH = artifacts.require('WETH9')
+const Migrator = artifacts.require('Migrator')
 const SoneSwapRouter = artifacts.require('SoneSwapRouter')
 const SoneMasterFarmer = artifacts.require('SoneMasterFarmer')
-const MockERC20 = artifacts.require('MockERC20')
-const Migrator = artifacts.require('Migrator')
-const BigNumber = require('bn.js')
-var BN = (s) => new BigNumber(s.toString(), 10)
+
+const revertMsg = require("./constants/exceptions.js").revertMsg;
+
+// var BN = (s) => new BigNumber(s.toString(), 10)
 
 contract('staking', ([alice, dev, owner]) => {
   beforeEach(async () => {
@@ -43,7 +46,7 @@ contract('staking', ([alice, dev, owner]) => {
       assert.equal(migrator, this.migrator.address)
     })
     it('exception not owner', async () => {
-      await expectRevert(this.soneMasterFarmer.setMigrator(this.migrator.address, {from: alice}), reasonRevert.NOT_OWNER)
+      await expectRevert(this.soneMasterFarmer.setMigrator(this.migrator.address, {from: alice}), revertMsg.NOT_OWNER)
     })
     // migrate
    
@@ -77,11 +80,11 @@ contract('staking', ([alice, dev, owner]) => {
       )
     })
     it('exception already set', async () => {
-      await expectRevert(this.soneMasterFarmer.migrate(0, {from: owner}), reasonRevert.NOT_EXIST_MIGRATOR)
+      await expectRevert(this.soneMasterFarmer.migrate(0, {from: owner}), revertMsg.NOT_EXIST_MIGRATOR)
     })
     it('exception migrate bad', async () => {
       await this.soneMasterFarmer.setMigrator(this.migrator.address, {from: owner})
-      await expectRevert(this.soneMasterFarmer.migrate(0, {from: owner}), reasonRevert.MIGRATE_BAD)
+      await expectRevert(this.soneMasterFarmer.migrate(0, {from: owner}), revertMsg.MIGRATE_BAD)
     })
     it('success', async () => {
       await this.soneMasterFarmer.setMigrator(this.migrator.address, {from: owner})
