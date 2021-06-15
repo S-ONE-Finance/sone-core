@@ -1,9 +1,11 @@
-const UniswapV2Factory = artifacts.require('UniswapV2Factory')
-const SoneSwapRouter = artifacts.require('SoneSwapRouter')
-const WETH = artifacts.require('WETH9')
-const UniswapV2Pair = artifacts.require('UniswapV2Pair')
-const MockERC20 = artifacts.require('MockERC20')
 const BigNumber = require('bn.js')
+
+const MockERC20 = artifacts.require('MockERC20')
+const WETH = artifacts.require('WETH9')
+const UniswapV2Factory = artifacts.require('UniswapV2Factory')
+const UniswapV2Pair = artifacts.require('UniswapV2Pair')
+const SoneSwapRouter = artifacts.require('SoneSwapRouter')
+
 var BN = (s) => new BigNumber(s.toString(), 10)
 
 const MINIMUM_LIQUIDITY = 1000
