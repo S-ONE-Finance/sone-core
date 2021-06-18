@@ -27,7 +27,7 @@
   "scripts": {
     "precompile": "rimraf build",
     "compile": "yarn truffle compile",
-    "flatten": "mkdir -p build/flatten-contracts && yarn truffle-flattener",
+    "flatten": "./scripts/generate-flatten.sh",
     "deploy-weth:local": "yarn truffle migrate -f 4 --to 4 --network dev",
     "deploy:local": "yarn truffle migrate --to 3 --network dev",
     "deploy:ropsten": "yarn truffle migrate --to 3 --network ropsten",
