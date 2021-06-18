@@ -1,14 +1,4 @@
-/*
-----------------------------------------
-NOTE: 
-- DEPLOY SONE TOKEN IN NETWORK `DEV`
-- COPY ADDRESS SONE TOKEN TO ENV
-- RUN TEST IN NETWORK `DEV`
-----------------------------------------
-*/
-
 require('dotenv').config();
-// const BigNumber = require('bn.js')
 const { expectRevert } = require('@openzeppelin/test-helpers');
 
 const MockERC20 = artifacts.require('MockERC20')
@@ -18,57 +8,73 @@ const UniswapV2Pair = artifacts.require('UniswapV2Pair')
 const SoneSwapRouter = artifacts.require('SoneSwapRouter')
 const SoneMasterFarmer = artifacts.require('SoneMasterFarmer')
 
-const revertMsg = require("./constants/exceptions.js").revertMsg;
-const SoneTokenInferface = require('../build/contracts/ISoneToken.json')
+const revertMsg = require("../constants/exceptions.js").revertMsg;
+const { getPairAddress } = require('../lib/utils')
+const SoneTokenInferface = require('../../build/contracts/ISoneToken.json')
 
-// var BN = (s) => new BigNumber(s.toString(), 10)
+const FACTORY_ADDRESS = `0xF064608e98EEB7363E3ecC511Ca0ED09a3192c83`,
+  ROUTER_ADDRESS = `0x4354DD6060C858dE7704D2f11EfC582c49A73889`,
+  WETH_ADDRESS = `0xc778417E063141139Fce010982780140Aa0cD5Ab`,
+  TOKEN0_ADDRESS = `0xAf85dD74317AE72674Bf77200D2ff3e80e85e375`,
+  TOKEN1_ADDRESS = `0x38152Db641aF29Dd4712a6f062d1B993CF67Afef`,
+  MASTER_FARMER_ADDRESS = `0x63F66ed3fC966350A656701c09e312010915E997`
 
 contract('SoneMasterFarmer', ([alice, dev, owner]) => {
   beforeEach(async () => {
-    this.weth = await WETH.new({ from: owner })
-    this.factory = await UniswapV2Factory.new(owner, { from: owner })
-    this.token0 = await MockERC20.new('TOKEN0', 'TOKEN0', '10000000', { from: alice })
-    this.token1 = await MockERC20.new('TOKEN1', 'TOKEN1', '10000000', { from: alice })
-    this.router = await SoneSwapRouter.new(this.factory.address, this.weth.address, { from: owner })
-    this.pair = await UniswapV2Pair.at((await this.factory.createPair(this.token0.address, this.token1.address)).logs[0].args.pair)
+    this.weth = await new web3.eth.Contract(WETH.abi, WETH_ADDRESS)
+    this.factory = await new web3.eth.Contract(UniswapV2Factory.abi, FACTORY_ADDRESS)
+    // this.token0 = await MockERC20.new('TOKEN0', 'TOKEN0', '10000000', { from: alice })
+    // this.token1 = await MockERC20.new('TOKEN1', 'TOKEN1', '10000000', { from: alice })
+    this.token0 = await new web3.eth.Contract(MockERC20.abi, TOKEN0_ADDRESS)
+    this.token1 = await new web3.eth.Contract(MockERC20.abi, TOKEN1_ADDRESS)
+    // this.router = await SoneSwapRouter.new(this.factory.address, this.weth.address, { from: owner })
+    this.router = await new web3.eth.Contract(SoneSwapRouter.abi, ROUTER_ADDRESS)
+
+    this.pair = await new web3.eth.Contract(UniswapV2Pair.abi, await getPairAddress(this.factory, this.token0.options.address, this.token1.options.address))
+
     this.soneToken = await new web3.eth.Contract(SoneTokenInferface.abi, process.env.SONE_ADDRESS)
-    this.soneMasterFarmer = await SoneMasterFarmer.new(process.env.SONE_ADDRESS, dev, 5, 1, 720, {from: owner})
-    
-    this.swapFee = await this.factory.swapFee()
-    const allowTransferOnDefault = 12743793;
-    const allowTransferOnCurrent = await this.soneToken.methods.allowTransferOn().call();
-    if(allowTransferOnDefault == allowTransferOnCurrent){
-      const blockLastest = await web3.eth.getBlockNumber();
-      await this.soneToken.methods.setAllowTransferOn(blockLastest+1).send({from: alice}) // test
+    // this.soneMasterFarmer = await SoneMasterFarmer.new(process.env.SONE_ADDRESS, dev, 5, 1, 720, { from: owner })
+    this.soneMasterFarmer = await new web3.eth.Contract(SoneMasterFarmer.abi, MASTER_FARMER_ADDRESS)
+
+    this.swapFee = await this.factory.methods.swapFee().call()
+    const allowTransferOnDefault = 12743793
+    const allowTransferOnCurrent = await this.soneToken.methods.allowTransferOn().call()
+    if (allowTransferOnDefault == allowTransferOnCurrent) {
+      const blockLastest = await web3.eth.getBlockNumber()
+      await this.soneToken.methods.setAllowTransferOn(blockLastest + 1).send({ from: alice }) // test
     }
-    await this.soneToken.methods.transferOwnership(this.soneMasterFarmer.address).send({from: alice})
-    // await this.soneMasterFarmer.mintSoneToken(alice, 100, {from: owner});
-    // const balance = await this.soneToken.methods.balanceOf(alice).call({from: alice});
+
+    // Change SONE token owner to Master Farmer
+    const soneOwner = await this.soneToken.methods.owner().call()
+    if (soneOwner != MASTER_FARMER_ADDRESS) {
+      assert.equal(soneOwner, alice, `SONE token owner is not alice`)
+      await this.soneToken.methods.transferOwnership(this.soneMasterFarmer.options.address).send({ from: alice })
+    }
   })
-  afterEach(async() => {
-    await this.soneMasterFarmer.transferOwnershipSoneToken(alice,{ from: owner })
+  afterEach(async () => {
+    await this.soneMasterFarmer.methods.transferOwnershipSoneToken(alice, { from: owner })
   })
 
   describe('#add pool', async () => {
     it('success', async () => {
-        await this.soneMasterFarmer.add(
-            10,
-            this.pair.address,
-            true,
-            {from: owner}
-        )
-        assert.equal((await this.soneMasterFarmer.poolLength()).valueOf(), 1)
-        assert.equal((await this.soneMasterFarmer.totalAllocPoint()).valueOf(), 10)
-        const pool1 = await this.soneMasterFarmer.poolInfo(0)
-        assert.equal(pool1.lpToken, this.pair.address)
-        assert.equal(pool1.allocPoint, 10)
+      await this.soneMasterFarmer.add(
+        10,
+        this.pair.address,
+        true,
+        { from: owner }
+      )
+      assert.equal((await this.soneMasterFarmer.poolLength()).valueOf(), 1)
+      assert.equal((await this.soneMasterFarmer.totalAllocPoint()).valueOf(), 10)
+      const pool1 = await this.soneMasterFarmer.poolInfo(0)
+      assert.equal(pool1.lpToken, this.pair.address)
+      assert.equal(pool1.allocPoint, 10)
     })
     it('exception not owner', async () => {
       await expectRevert(this.soneMasterFarmer.add(
         10,
         this.pair.address,
         true,
-        {from: alice}
+        { from: alice }
       ), revertMsg.NOT_OWNER)
     })
     it('exception pool already exist', async () => {
@@ -76,13 +82,13 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         10,
         this.pair.address,
         true,
-        {from: owner}
-    )
+        { from: owner }
+      )
       await expectRevert(this.soneMasterFarmer.add(
         10,
         this.pair.address,
         true,
-        {from: owner}
+        { from: owner }
       ), revertMsg.POOL_ALREADY_EXIT)
     })
   });
@@ -92,7 +98,7 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         10,
         this.pair.address,
         true,
-        {from: owner}
+        { from: owner }
       )
     })
     it('success', async () => {
@@ -100,7 +106,7 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         0,
         20,
         true,
-        {from: owner}
+        { from: owner }
       )
       assert.equal((await this.soneMasterFarmer.poolLength()).valueOf(), 1)
       assert.equal((await this.soneMasterFarmer.totalAllocPoint()).valueOf(), 20)
@@ -113,7 +119,7 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         0,
         10,
         true,
-        {from: alice}
+        { from: alice }
       ), revertMsg.NOT_OWNER)
     })
   });
@@ -123,7 +129,7 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         10,
         this.pair.address,
         true,
-        {from: owner}
+        { from: owner }
       )
       await this.token0.approve(this.router.address, 10000000, { from: alice })
       await this.token1.approve(this.router.address, 10000000, { from: alice })
@@ -151,26 +157,26 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
       )
     })
     it('success', async () => {
-      const balanceDevBefore = await this.soneToken.methods.balanceOf(dev).call({from: dev})
-      const balanceSoneTokenBefore = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({from: alice})
-      const balanceSoneAliceBefore = await this.soneToken.methods.balanceOf(alice).call({from: alice})
-      await this.pair.approve(this.soneMasterFarmer.address, 10000000, {from: alice})
+      const balanceDevBefore = await this.soneToken.methods.balanceOf(dev).call({ from: dev })
+      const balanceSoneTokenBefore = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({ from: alice })
+      const balanceSoneAliceBefore = await this.soneToken.methods.balanceOf(alice).call({ from: alice })
+      await this.pair.approve(this.soneMasterFarmer.address, 10000000, { from: alice })
       await this.soneMasterFarmer.deposit(
         0,
         999000,
-        {from: alice}
+        { from: alice }
       )
       await this.soneMasterFarmer.deposit(
         0,
         1000000,
-        {from: alice}
+        { from: alice }
       )
-      const balanceDevAfter = await this.soneToken.methods.balanceOf(dev).call({from: dev})
-      const balanceSoneTokenAfter = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({from: alice})
-      const balanceSoneAliceAfter = await this.soneToken.methods.balanceOf(alice).call({from: alice})
-      assert.equal(balanceDevAfter-balanceDevBefore, 4) // 25% * 16
-      assert.equal(balanceSoneTokenAfter-balanceSoneTokenBefore, 131) // 75% * 16 + 75% * 159
-      assert.equal(balanceSoneAliceAfter-balanceSoneAliceBefore, 40) // 159 - 75%*159
+      const balanceDevAfter = await this.soneToken.methods.balanceOf(dev).call({ from: dev })
+      const balanceSoneTokenAfter = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({ from: alice })
+      const balanceSoneAliceAfter = await this.soneToken.methods.balanceOf(alice).call({ from: alice })
+      assert.equal(balanceDevAfter - balanceDevBefore, 4) // 25% * 16
+      assert.equal(balanceSoneTokenAfter - balanceSoneTokenBefore, 131) // 75% * 16 + 75% * 159
+      assert.equal(balanceSoneAliceAfter - balanceSoneAliceBefore, 40) // 159 - 75%*159
       assert.equal(await this.pair.balanceOf(this.soneMasterFarmer.address).valueOf(), 1999000)
       const userInfo = await this.soneMasterFarmer.userInfo(0, alice);
       assert.equal(userInfo.amount.valueOf(), 1999000)
@@ -181,7 +187,7 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
       await expectRevert(this.soneMasterFarmer.deposit(
         0,
         0,
-        {from: alice}
+        { from: alice }
       ), revertMsg.INVALID_AMOUNT_DEPOSIT)
     })
   });
@@ -191,7 +197,7 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         10,
         this.pair.address,
         true,
-        {from: owner}
+        { from: owner }
       )
       await this.token0.approve(this.router.address, 10000000, { from: alice })
       await this.token1.approve(this.router.address, 10000000, { from: alice })
@@ -206,28 +212,28 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         11571287987,
         { from: alice }
       )
-      await this.pair.approve(this.soneMasterFarmer.address, 10000000, {from: alice})
+      await this.pair.approve(this.soneMasterFarmer.address, 10000000, { from: alice })
       await this.soneMasterFarmer.deposit(
         0,
         999000,
-        {from: alice}
+        { from: alice }
       )
     })
     it('success', async () => {
-      const balanceDevBefore = await this.soneToken.methods.balanceOf(dev).call({from: dev})
-      const balanceSoneTokenBefore = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({from: alice})
-      const balanceSoneAliceBefore = await this.soneToken.methods.balanceOf(alice).call({from: alice})
+      const balanceDevBefore = await this.soneToken.methods.balanceOf(dev).call({ from: dev })
+      const balanceSoneTokenBefore = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({ from: alice })
+      const balanceSoneAliceBefore = await this.soneToken.methods.balanceOf(alice).call({ from: alice })
       await this.soneMasterFarmer.withdraw(
         0,
         999000,
-        {from: alice}
+        { from: alice }
       )
-      const balanceDevAfter = await this.soneToken.methods.balanceOf(dev).call({from: dev})
-      const balanceSoneTokenAfter = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({from: alice})
-      const balanceSoneAliceAfter = await this.soneToken.methods.balanceOf(alice).call({from: alice})
-      assert.equal(balanceDevAfter-balanceDevBefore, 4) // 25% * 16
-      assert.equal(balanceSoneTokenAfter-balanceSoneTokenBefore, 131) // 75% * 16 + 75% * 159
-      assert.equal(balanceSoneAliceAfter-balanceSoneAliceBefore, 40) // 159 - 75%*159
+      const balanceDevAfter = await this.soneToken.methods.balanceOf(dev).call({ from: dev })
+      const balanceSoneTokenAfter = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({ from: alice })
+      const balanceSoneAliceAfter = await this.soneToken.methods.balanceOf(alice).call({ from: alice })
+      assert.equal(balanceDevAfter - balanceDevBefore, 4) // 25% * 16
+      assert.equal(balanceSoneTokenAfter - balanceSoneTokenBefore, 131) // 75% * 16 + 75% * 159
+      assert.equal(balanceSoneAliceAfter - balanceSoneAliceBefore, 40) // 159 - 75%*159
       assert.equal(await this.pair.balanceOf(this.soneMasterFarmer.address).valueOf(), 0)
       const userInfo = await this.soneMasterFarmer.userInfo(0, alice);
       assert.equal(userInfo.amount.valueOf(), 0)
@@ -237,7 +243,7 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
       await expectRevert(this.soneMasterFarmer.withdraw(
         0,
         1000000,
-        {from: alice}
+        { from: alice }
       ), revertMsg.INVALID_AMOUNT_WITHDRAW)
     })
   })
@@ -247,7 +253,7 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         10,
         this.pair.address,
         true,
-        {from: owner}
+        { from: owner }
       )
       await this.token0.approve(this.router.address, 10000000, { from: alice })
       await this.token1.approve(this.router.address, 10000000, { from: alice })
@@ -262,27 +268,27 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         11571287987,
         { from: alice }
       )
-      await this.pair.approve(this.soneMasterFarmer.address, 10000000, {from: alice})
+      await this.pair.approve(this.soneMasterFarmer.address, 10000000, { from: alice })
       await this.soneMasterFarmer.deposit(
         0,
         999000,
-        {from: alice}
+        { from: alice }
       )
     })
     it('success', async () => {
-      const balanceDevBefore = await this.soneToken.methods.balanceOf(dev).call({from: dev})
-      const balanceSoneTokenBefore = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({from: alice})
-      const balanceSoneAliceBefore = await this.soneToken.methods.balanceOf(alice).call({from: alice})
+      const balanceDevBefore = await this.soneToken.methods.balanceOf(dev).call({ from: dev })
+      const balanceSoneTokenBefore = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({ from: alice })
+      const balanceSoneAliceBefore = await this.soneToken.methods.balanceOf(alice).call({ from: alice })
       await this.soneMasterFarmer.updatePool(
         0,
-        {from: alice}
+        { from: alice }
       )
-      const balanceDevAfter = await this.soneToken.methods.balanceOf(dev).call({from: dev})
-      const balanceSoneTokenAfter = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({from: alice})
-      const balanceSoneAliceAfter = await this.soneToken.methods.balanceOf(alice).call({from: alice})
-      assert.equal(balanceDevAfter-balanceDevBefore, 4) // 25% * 16
-      assert.equal(balanceSoneTokenAfter-balanceSoneTokenBefore, 12) // 75% * 16
-      assert.equal(balanceSoneAliceAfter-balanceSoneAliceBefore, 0)
+      const balanceDevAfter = await this.soneToken.methods.balanceOf(dev).call({ from: dev })
+      const balanceSoneTokenAfter = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({ from: alice })
+      const balanceSoneAliceAfter = await this.soneToken.methods.balanceOf(alice).call({ from: alice })
+      assert.equal(balanceDevAfter - balanceDevBefore, 4) // 25% * 16
+      assert.equal(balanceSoneTokenAfter - balanceSoneTokenBefore, 12) // 75% * 16
+      assert.equal(balanceSoneAliceAfter - balanceSoneAliceBefore, 0)
       const poolInfo = await this.soneMasterFarmer.poolInfo(0);
       assert.equal(poolInfo.accSonePerShare.valueOf(), 160160160) // 0 + (160 * 10^12) / 999000
       assert.equal(poolInfo.lastRewardBlock.valueOf(), await web3.eth.getBlockNumber())
@@ -311,13 +317,13 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         10,
         this.pair.address,
         true,
-        {from: owner}
+        { from: owner }
       )
       await this.soneMasterFarmer.add(
         10,
         this.pair1.address,
         true,
-        {from: owner}
+        { from: owner }
       )
     })
     it('success', async () => {
@@ -325,7 +331,7 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         1,
         30,
         10,
-        {from: alice}
+        { from: alice }
       )
       assert.equal(result.forFarmer.valueOf(), 2320) // ((30-1)*32*10)/20
       assert.equal(result.forDev.valueOf(), 232) // 10% * forFarmer
@@ -350,33 +356,33 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         10,
         this.pair.address,
         true,
-        {from: owner}
+        { from: owner }
       )
-      await this.pair.approve(this.soneMasterFarmer.address, 10000000, {from: alice})
+      await this.pair.approve(this.soneMasterFarmer.address, 10000000, { from: alice })
       await this.soneMasterFarmer.deposit(
         0,
         999000,
-        {from: alice}
+        { from: alice }
       )
-      
+
     })
     it('no pending', async () => {
       const result = await this.soneMasterFarmer.pendingReward(
         0,
         alice,
-        {from: alice}
+        { from: alice }
       )
       assert.equal(result.valueOf(), 0) // no new block
     })
     it('exits pending', async () => {
       await this.soneMasterFarmer.updatePool(
         0,
-        {from: alice}
+        { from: alice }
       )
       const result = await this.soneMasterFarmer.pendingReward(
         0,
         alice,
-        {from: alice}
+        { from: alice }
       )
       assert.equal(result.valueOf(), 159) // has 1 new block
     })
@@ -387,7 +393,7 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         10,
         this.pair.address,
         true,
-        {from: owner}
+        { from: owner }
       )
       await this.token0.approve(this.router.address, 10000000, { from: alice })
       await this.token1.approve(this.router.address, 10000000, { from: alice })
@@ -402,27 +408,27 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         11571287987,
         { from: alice }
       )
-      await this.pair.approve(this.soneMasterFarmer.address, 10000000, {from: alice})
+      await this.pair.approve(this.soneMasterFarmer.address, 10000000, { from: alice })
       await this.soneMasterFarmer.deposit(
         0,
         999000,
-        {from: alice}
+        { from: alice }
       )
     })
     it('success', async () => {
-      const balanceDevBefore = await this.soneToken.methods.balanceOf(dev).call({from: dev})
-      const balanceSoneTokenBefore = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({from: alice})
-      const balanceSoneAliceBefore = await this.soneToken.methods.balanceOf(alice).call({from: alice})
+      const balanceDevBefore = await this.soneToken.methods.balanceOf(dev).call({ from: dev })
+      const balanceSoneTokenBefore = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({ from: alice })
+      const balanceSoneAliceBefore = await this.soneToken.methods.balanceOf(alice).call({ from: alice })
       await this.soneMasterFarmer.claimReward(
         0,
-        {from: alice}
+        { from: alice }
       )
-      const balanceDevAfter = await this.soneToken.methods.balanceOf(dev).call({from: dev})
-      const balanceSoneTokenAfter = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({from: alice})
-      const balanceSoneAliceAfter = await this.soneToken.methods.balanceOf(alice).call({from: alice})
-      assert.equal(balanceDevAfter-balanceDevBefore, 4) // 25% * 16
-      assert.equal(balanceSoneTokenAfter-balanceSoneTokenBefore, 131) // 75% * 16 + 75% * 159
-      assert.equal(balanceSoneAliceAfter-balanceSoneAliceBefore, 40) // 159 - 75%*159
+      const balanceDevAfter = await this.soneToken.methods.balanceOf(dev).call({ from: dev })
+      const balanceSoneTokenAfter = await this.soneToken.methods.balanceOf(process.env.SONE_ADDRESS).call({ from: alice })
+      const balanceSoneAliceAfter = await this.soneToken.methods.balanceOf(alice).call({ from: alice })
+      assert.equal(balanceDevAfter - balanceDevBefore, 4) // 25% * 16
+      assert.equal(balanceSoneTokenAfter - balanceSoneTokenBefore, 131) // 75% * 16 + 75% * 159
+      assert.equal(balanceSoneAliceAfter - balanceSoneAliceBefore, 40) // 159 - 75%*159
       assert.equal(await this.pair.balanceOf(this.soneMasterFarmer.address).valueOf(), 999000)
       const userInfo = await this.soneMasterFarmer.userInfo(0, alice);
       assert.equal(userInfo.amount.valueOf(), 999000)
@@ -436,7 +442,7 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         10,
         this.pair.address,
         true,
-        {from: owner}
+        { from: owner }
       )
       await this.token0.approve(this.router.address, 10000000, { from: alice })
       await this.token1.approve(this.router.address, 10000000, { from: alice })
@@ -451,17 +457,17 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         11571287987,
         { from: alice }
       )
-      await this.pair.approve(this.soneMasterFarmer.address, 10000000, {from: alice})
+      await this.pair.approve(this.soneMasterFarmer.address, 10000000, { from: alice })
       await this.soneMasterFarmer.deposit(
         0,
         999000,
-        {from: alice}
+        { from: alice }
       )
     })
     it('success', async () => {
       await this.soneMasterFarmer.emergencyWithdraw(
         0,
-        {from: alice}
+        { from: alice }
       )
       assert.equal(await this.pair.balanceOf(this.soneMasterFarmer.address).valueOf(), 0)
       assert.equal(await this.pair.balanceOf(alice).valueOf(), 999000)
@@ -474,14 +480,14 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
     it('success', async () => {
       await this.soneMasterFarmer.dev(
         alice,
-        {from: dev}
+        { from: dev }
       )
       assert.equal(await this.soneMasterFarmer.devaddr(), alice)
     })
     it('not dev address', async () => {
       await expectRevert(this.soneMasterFarmer.dev(
         alice,
-        {from: alice}
+        { from: alice }
       ), revertMsg.NOT_DEV_ADDRESSS)
     })
   })
@@ -491,20 +497,20 @@ contract('SoneMasterFarmer', ([alice, dev, owner]) => {
         10,
         this.pair.address,
         true,
-        {from: owner}
+        { from: owner }
       )
     })
     it('pid1 = 0', async () => {
       const result = await this.soneMasterFarmer.getNewRewardPerBlock(
         0,
-        {from: alice}
+        { from: alice }
       )
       assert.equal(result.valueOf(), 160)  // 32 * 5
     })
     it('pid1 = 1', async () => {
       const result = await this.soneMasterFarmer.getNewRewardPerBlock(
         0,
-        {from: alice}
+        { from: alice }
       )
       assert.equal(result.valueOf(), 160)  // 32 * 5 * 10 (allocPoint) / 10 (totalAllocPoint)
     })

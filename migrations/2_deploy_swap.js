@@ -5,7 +5,9 @@ const SoneSwapRouter = artifacts.require("SoneSwapRouter");
 const feeSetterAddress = process.env.FEE_SETTER_ADDRESS; // address of fee setter
 const wethAddress = process.env.WETH_ADDRESS; // address of WETH
 
-module.exports = async function (deployer) {
+module.exports = async function (deployer, network) {
+  if (network == 'testing_ropsten') return
+
   // deploy factory
   await deployer.deploy(
     UniswapV2Factory,

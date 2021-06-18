@@ -46,6 +46,23 @@
        gas: process.env.LOCAL_GAS_LIMIT,           // Ganache has a lower block limit than mainnet 12,500,000. MAXIMUM Ropsten Block GAS_LIMIT = 6,721,975
        gasPrice: process.env.LOCAL_GAS_PRICE       // Default gasPrice to send a transaction
      },
+     testing_ropsten: {
+      provider: () => new HDWalletProvider( // Using MNEMONIC or PRIVATE_KEY
+        process.env.MNEMONIC,
+       //  process.env.OPERATOR_PRIVATE_KEY,
+        // `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
+        `wss://ropsten.infura.io/ws/v3/${process.env.INFURA_PROJECT_ID}`
+      ),
+      network_id: 3,                        // Ropsten's id
+      gas: process.env.GAS_LIMIT,           // Ropsten has a lower block limit than mainnet 12,500,000. MAXIMUM Ropsten Block GAS_LIMIT = 8,000,000
+      gasPrice: process.env.GAS_PRICE,      // Default gasPrice to send a transaction
+      // confirmations: 2,                     // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 200,                   // # of blocks before a deployment times out  (minimum/default: 50)
+      from: process.env.OPERATOR_ADDRESS,   // Send transactions from Operator Address
+      skipDryRun: true,                     // Skip dry run before migrations? (default: false for public nets )
+      websocket: true,
+      networkCheckTimeout: 1800000
+    },
      // Another network with more advanced options...
      // advanced: {
      // port: 8777,             // Custom port
@@ -76,8 +93,8 @@
      },
      ropsten: {
        provider: () => new HDWalletProvider( // Using MNEMONIC or PRIVATE_KEY
-         // process.env.MNEMONIC,
-         process.env.OPERATOR_PRIVATE_KEY,
+         process.env.MNEMONIC,
+        //  process.env.OPERATOR_PRIVATE_KEY,
          // `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`
          `wss://ropsten.infura.io/ws/v3/${process.env.INFURA_PROJECT_ID}`
        ),

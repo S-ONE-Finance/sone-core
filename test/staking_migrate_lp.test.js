@@ -1,5 +1,4 @@
 require('dotenv').config();
-// const BigNumber = require('bn.js')
 const { expectRevert } = require('@openzeppelin/test-helpers');
 
 const MockERC20 = artifacts.require('MockERC20')
@@ -14,7 +13,7 @@ const revertMsg = require("./constants/exceptions.js").revertMsg;
 
 // var BN = (s) => new BigNumber(s.toString(), 10)
 
-contract('staking', ([alice, dev, owner]) => {
+contract('SoneMasterFarmer', ([alice, dev, owner]) => {
   beforeEach(async () => {
     this.factory = await UniswapV2Factory.new(owner, { from: owner })
     this.token0 = await MockERC20.new('TOKEN0', 'TOKEN0', '10000000', { from: alice })

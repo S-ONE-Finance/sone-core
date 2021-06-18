@@ -6,7 +6,9 @@ const startBlock = 13546394; // Blocker number 13546394 (on mainnet) ~ 2021-11-1
 const halvingAfterBlock = 45134; // Number block for week ~ 13.4s / block
 const soneTokenAddress = process.env.SONE_ADDRESS;
 
-module.exports = async function (deployer) {
+module.exports = async function (deployer, network) {
+    if (network == 'testing_ropsten') return
+
     await deployer.deploy(
         SoneMasterFarmer,
         soneTokenAddress,

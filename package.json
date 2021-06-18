@@ -38,7 +38,8 @@
     "deploy-stake:local": "yarn truffle migrate -f 3 --to 3 --network dev",
     "deploy-stake:ropsten": "yarn truffle migrate -f 3 --to 3 --network ropsten",
     "deploy-stake:rinkeby": "yarn truffle migrate -f 3 --to 3 --network rinkeby",
-    "test": "yarn truffle test"
+    "test": "yarn truffle test",
+    "test:ropsten": "yarn truffle test --network testing_ropsten"
   },
   "devDependencies": {
     "dotenv": "^8.2.0",
