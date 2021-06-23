@@ -4,6 +4,7 @@
 # Build
 /build
 /builds
+/types
 
 # System
 .DS_Store
