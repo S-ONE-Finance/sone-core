@@ -11,6 +11,5 @@ deploy:
     - feature/deploy
   script:
     - echo "//registry.npmjs.org/:_auth=${NPM_TOKEN}" > .npmrc
-    - echo "emai=${EMAIL}" >> .npmrc
     - npm whoami
     - npm publish --access public
