@@ -1,5 +1,5 @@
 {
-  "name": "@s-one-finance/core",
+  "name": "@sone-finance/core",
   "description": "🛠 Smart Contract for S-ONE Finance Swap.",
   "version": "0.0.6",
   "main": "index.js",
