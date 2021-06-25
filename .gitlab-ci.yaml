@@ -1,0 +1,14 @@
+image: node:latest
+stages:
+  - deploy
+
+deploy:
+  tags:
+    - bh
+  stage: deploy
+  environment: tungpv
+  only:
+    - feature/deploy
+  script:
+    - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+    - npm publish

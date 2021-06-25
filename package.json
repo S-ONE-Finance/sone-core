@@ -1,7 +1,7 @@
 {
-  "name": "@tungpv/core",
+  "name": "@s-one-finance/core",
   "description": "🛠 Smart Contract for S-ONE Finance Swap.",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "main": "index.js",
   "files": [
     "build",
@@ -10,10 +10,7 @@
     "constants"
   ],
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/S-ONE-Finance/soneswap-core.git"
-  },
+  "repository": "https://github.com/S-ONE-Finance/soneswap-core.git",
   "keywords": [
     "soneswap",
     "ethereum",
@@ -49,13 +46,5 @@
     "mocha": "^6.2.2",
     "rimraf": "^3.0.2",
     "truffle-flattener": "^1.4.4"
-  },
-  "bugs": {
-    "url": "https://github.com/S-ONE-Finance/soneswap-core/issues"
-  },
-  "homepage": "https://github.com/S-ONE-Finance/soneswap-core#readme",
-  "directories": {
-    "test": "test"
-  },
-  "author": "TungPV"
+  }
 }
