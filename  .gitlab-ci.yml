@@ -6,6 +6,9 @@ deploy:
   tags:
     - smart-contract
   stage: deploy
+  environment: develop
+  only:
+    - develop
   script:
     - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
     - npm publish
