@@ -3,6 +3,8 @@ stages:
   - deploy
 
 deploy:
+  tag:
+    - smart-contract
   stage: deploy
   only:
     - feature/deploy
