@@ -3,7 +3,7 @@ stages:
   - deploy
 
 deploy:
-  tag:
+  tags:
     - smart-contract
   stage: deploy
   script:
