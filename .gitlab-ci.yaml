@@ -3,10 +3,7 @@ stages:
   - deploy
 
 deploy:
-  tags:
-    - bh
   stage: deploy
-  environment: tungpv
   only:
     - feature/deploy
   script:
