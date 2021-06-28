@@ -241,7 +241,7 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
       assert.equal(reserves[1].toNumber(), 1000000);
     });
 
-    it.only("to a existed pool including ETH", async () => {
+    it("to a existed pool including ETH", async () => {
       _pair = await UniswapV2Pair.at(
         (
           await _factory.createPair(_token0.address, _weth.address)
