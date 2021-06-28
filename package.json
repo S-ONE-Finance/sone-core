@@ -6,8 +6,7 @@
   "files": [
     "build",
     "contracts",
-    "test",
-    "constants"
+    "test"
   ],
   "license": "MIT",
   "repository": "https://github.com/S-ONE-Finance/soneswap-core.git",
