@@ -47,7 +47,7 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
     await _token0.transfer(alice, 10000000, { from: owner });
     await _token1.transfer(alice, 10000000, { from: owner });
 
-    // Appove allowance to spend alice's tokens for the _router
+    // Approve allowance to spend alice's tokens for the _router
     await _token0.approve(_router.address, 7000000, { from: alice });
     await _token1.approve(_router.address, 7000000, { from: alice });
   });
@@ -60,7 +60,7 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
       let amountBDesired: BN = _BN(1000000);
       let amountAMin: BN = _BN(1000000);
       let amountBMin: BN = _BN(1000000);
-
+      // Add liquidity to a new pool
       await _router.addLiquidity(
         _token0.address,
         _token1.address,
@@ -74,13 +74,16 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
           from: alice,
         }
       );
-
-      assert.equal((await _pair.totalSupply()).toNumber(), 1000000);
-      assert.equal((await _pair.balanceOf(alice)).toNumber(), 1000000 - MINIMUM_LIQUIDITY);
-
+      // Check reserves, total LP token and user's balance after adding at the first time
+      assert.equal((await _pair.totalSupply()).toNumber(), 1000000, "totalSupply equal to 1000000");
+      assert.equal(
+        (await _pair.balanceOf(alice)).toNumber(),
+        1000000 - MINIMUM_LIQUIDITY,
+        "user Balance equal to totalSupply - MINIMUM_LIQUIDITY"
+      );
       const reserves = await _pair.getReserves();
-      assert.equal(reserves[0].toNumber(), 1000000);
-      assert.equal(reserves[1].toNumber(), 1000000);
+      assert.equal(reserves[0].toNumber(), 1000000, "reserves[0] equal to 1000000");
+      assert.equal(reserves[1].toNumber(), 1000000, "reserves[1] equal to 1000000");
     });
 
     it("to a existed pool excluding ETH", async () => {
@@ -112,7 +115,7 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
 
       assert.equal(reservesBefore[0].toNumber(), 1500000, "reservesBefore[0] equal to 1500000");
       assert.equal(reservesBefore[1].toNumber(), 1000000, "reservesBefore[1] equal to 1000000");
-      assert.equal(totalSupplyBefore.toNumber(), 1224744, "totalSupplyBefore equal to 1224744"); // TO DO: explain minted LP token number
+      assert.equal(totalSupplyBefore.toNumber(), 1224744, "totalSupplyBefore equal to 1224744");
 
       // Prepare parameters to add liquidity for the second time
       enum Tokens {
@@ -166,7 +169,7 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
       const reservesAfter = await _pair.getReserves();
       const amountAActual = _BN(reservesAfter[0].toString()).sub(_BN(reservesBefore[0].toString()));
       const amountBActual = _BN(reservesAfter[1].toString()).sub(_BN(reservesBefore[1].toString()));
-      const aliceLPBlance = await _pair.balanceOf(alice);
+      const aliceLPBalance = await _pair.balanceOf(alice);
 
       // Check added amounts
       assert.isAtLeast(amountAActual.toNumber(), amountAMin.toNumber(), "amountAActual is greater or equal to amountAMin");
@@ -177,11 +180,11 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
       assert.equal(reservesAfter[0].toNumber(), 2500000, "reservesAfter[0] equal to 2500000");
       assert.equal(reservesAfter[1].toNumber(), 1666666, "reservesAfter[0] equal to 1666666");
       // Check total minted LP token of the pool and user's balance after adding liquidity second time
-      assert.equal(totalSupplyAfter.toNumber(), 2041239, "totalSupplyAfter equal to 2041239");  // TO DO: explain minted LP token number
+      assert.equal(totalSupplyAfter.toNumber(), 2041239, "totalSupplyAfter equal to 2041239"); // TO DO: explain minted LP token number
       assert.equal(
-        aliceLPBlance.toNumber(),
+        aliceLPBalance.toNumber(),
         totalSupplyAfter.toNumber() - MINIMUM_LIQUIDITY,
-        "aliceLPBlance equal to totalSupplyAfter - MINIMUM_LIQUIDITY"
+        "aliceLPBalance equal to totalSupplyAfter - MINIMUM_LIQUIDITY"
       );
     });
 
@@ -189,7 +192,7 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
       _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _weth.address)).logs[0].args.pair);
 
       const balanceBeforeAdd = await web3.eth.getBalance(alice);
-
+      // Add liquidity to a new pool
       const txAddLiquidity = await _router.addLiquidityETH(_token0.address, 1000000, 0, 0, alice, 11571287987, {
         from: alice,
         value: "1000000",
@@ -199,118 +202,102 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
       const balanceAfterAdd = await web3.eth.getBalance(alice);
 
       const value = _BN(balanceBeforeAdd).sub(_BN(balanceAfterAdd)).sub(_BN(fee));
-      assert.equal(value, 1000000);
-      assert.equal((await _pair.totalSupply()).toNumber(), 1000000);
-      assert.equal((await _pair.balanceOf(alice)).toNumber(), 1000000 - MINIMUM_LIQUIDITY);
-
+      // Check amount eth spent
+      assert.equal(value, 1000000, "Value ETH spent to add liquidity equal to 1000000");
+      // Check reserves, total LP token and user's balance after adding at the first time
+      assert.equal((await _pair.totalSupply()).toNumber(), 1000000, "totalSupply equal to 1000000");
+      assert.equal(
+        (await _pair.balanceOf(alice)).toNumber(),
+        1000000 - MINIMUM_LIQUIDITY,
+        "user lp token Balance equal to totalSupply - MINIMUM_LIQUIDITY"
+      );
       const reserves = await _pair.getReserves();
-      assert.equal(reserves[0].toNumber(), 1000000);
-      assert.equal(reserves[1].toNumber(), 1000000);
+      assert.equal(reserves[0].toNumber(), 1000000, "reserves[0] equal to 1000000");
+      assert.equal(reserves[1].toNumber(), 1000000, "reserves[1] equal to 1000000");
     });
 
     it("to a existed pool including ETH", async () => {
       _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _weth.address)).logs[0].args.pair);
 
       const balanceBeforeCreate = await web3.eth.getBalance(alice);
-      const firstAddLiquidity = await _router.addLiquidityETH(
-        _token0.address,
-        1000000,
-        0,
-        0,
-        alice,
-        11571287987,
-        {
-          from: alice,
-          value: "1000000",
-        }
-      );
+      // Add liquidity to a new pool
+      const firstAddLiquidity = await _router.addLiquidityETH(_token0.address, 1000000, 0, 0, alice, 11571287987, {
+        from: alice,
+        value: "1000000",
+      });
 
       let tx = await web3.eth.getTransaction(firstAddLiquidity.tx);
       let fee = firstAddLiquidity.receipt.gasUsed * Number(tx.gasPrice);
       const balanceAfterCreate = await web3.eth.getBalance(alice);
-      let value = _BN(balanceBeforeCreate)
-        .sub(_BN(balanceAfterCreate))
-        .sub(_BN(fee));
-      assert.equal(value.toNumber(), 1000000);
+      let value = _BN(balanceBeforeCreate).sub(_BN(balanceAfterCreate)).sub(_BN(fee));
       const reservesBefore = await _pair.getReserves();
+      const totalSupplyBefore = await _pair.totalSupply();
+      // Check amount eth spent
+      assert.equal(value.toNumber(), 1000000, "Value ETH spent to add liquidity equal to 1000000");
+      // Check reserves and total LP token after adding at the first time
+      assert.equal(reservesBefore[0].toNumber(), 1000000, "reservesBefore[0] equal to 1000000");
+      assert.equal(reservesBefore[1].toNumber(), 1000000, "reservesBefore[1] equal to 1000000");
+      assert.equal(totalSupplyBefore.toNumber(), 1000000, "totalSupplyBefore equal to 1000000");
+
+      // Prepare parameters to add liquidity for the second time
       enum Tokens {
         CURRENCY_A = "CURRENCY_A",
         CURRENCY_B = "CURRENCY_B",
       }
       const tokens: Token[] = [
-        new Token(
-          ChainId.MAINNET,
-          _token0.address,
-          (await _token0.decimals()).toNumber(),
-          await _token0.symbol(),
-          await _token0.name()
-        ),
-        new Token(
-          ChainId.MAINNET,
-          _weth.address,
-          (await _weth.decimals()).toNumber(),
-          await _weth.symbol(),
-          await _weth.name()
-        ),
+        new Token(ChainId.MAINNET, _token0.address, (await _token0.decimals()).toNumber(), await _token0.symbol(), await _token0.name()),
+        new Token(ChainId.MAINNET, _weth.address, (await _weth.decimals()).toNumber(), await _weth.symbol(), await _weth.name()),
       ];
       const pair = new Pair(
         new TokenAmount(tokens[0], reservesBefore[0].toString()),
         new TokenAmount(tokens[1], reservesBefore[1].toString())
       );
 
-      const dependentTokenAmount = pair
-        .priceOf(tokens[0])
-        .quote(new TokenAmount(tokens[0], BigInt(1500000)));
+      const dependentTokenAmount = pair.priceOf(tokens[0]).quote(new TokenAmount(tokens[0], BigInt(1500000)));
 
       const amounts: { [token in Tokens]: CurrencyAmount } = {
         [Tokens.CURRENCY_A]: new TokenAmount(tokens[0], BigInt(1500000)),
-        [Tokens.CURRENCY_B]: new TokenAmount(
-          tokens[1],
-          dependentTokenAmount.raw
-        ),
+        [Tokens.CURRENCY_B]: new TokenAmount(tokens[1], dependentTokenAmount.raw),
       };
       const allowedSlippage = 100; // 1%
       const amountsMin = {
-        [Tokens.CURRENCY_A]: calculateSlippageAmount(
-          amounts.CURRENCY_A,
-          allowedSlippage
-        )[0],
-        [Tokens.CURRENCY_B]: calculateSlippageAmount(
-          amounts.CURRENCY_B,
-          allowedSlippage
-        )[0],
+        [Tokens.CURRENCY_A]: calculateSlippageAmount(amounts.CURRENCY_A, allowedSlippage)[0],
+        [Tokens.CURRENCY_B]: calculateSlippageAmount(amounts.CURRENCY_B, allowedSlippage)[0],
       };
 
       let amountADesired = _BN(amounts.CURRENCY_A.numerator.toString());
+      let amountBDesired = _BN(amounts.CURRENCY_B.numerator.toString());
       let amountAMin = _BN(amountsMin.CURRENCY_A.toString());
       let amountBMin = _BN(amountsMin.CURRENCY_B.toString());
 
-      const txAddLiquidity = await _router.addLiquidityETH(
-        _token0.address,
-        amountADesired,
-        amountAMin,
-        amountBMin,
-        alice,
-        11571287987,
-        {
-          from: alice,
-          value: "1500000",
-        }
-      );
+      // Add liquidity to a existed pool
+      const txAddLiquidity = await _router.addLiquidityETH(_token0.address, amountADesired, amountAMin, amountBMin, alice, 11571287987, {
+        from: alice,
+        value: "1500000",
+      });
+
+      // Info after adding the second time
+      const reservesAfter = await _pair.getReserves();
+      const amountAActual = _BN(reservesAfter[0].toString()).sub(_BN(reservesBefore[0].toString()));
+      const amountBActual = _BN(reservesAfter[1].toString()).sub(_BN(reservesBefore[1].toString()));
+      const aliceLPBalance = await _pair.balanceOf(alice);
       tx = await web3.eth.getTransaction(txAddLiquidity.tx);
       fee = txAddLiquidity.receipt.gasUsed * Number(tx.gasPrice);
       const balanceAfterAdd = await web3.eth.getBalance(alice);
+      // Check amount eth spent
       value = _BN(balanceAfterCreate).sub(_BN(balanceAfterAdd)).sub(_BN(fee));
-      assert.equal(value.toNumber(), 1500000);
-      assert.equal((await _pair.totalSupply()).toNumber(), 2500000);
-      assert.equal(
-        (await _pair.balanceOf(alice)).toNumber(),
-        2500000 - MINIMUM_LIQUIDITY
-      );
-
-      const reserves = await _pair.getReserves();
-      assert.equal(reserves[0].toNumber(), 2500000);
-      assert.equal(reserves[1].toNumber(), 2500000);
+      assert.equal(value.toNumber(), 1500000, "value eth spent to add liquidity equal to 1500000");
+      // Check added amounts
+      assert.isAtLeast(amountAActual.toNumber(), amountAMin.toNumber(), "amountAActual is greater or equal to amountAMin");
+      assert.isAtLeast(amountBActual.toNumber(), amountBMin.toNumber(), "amountAActual is greater or equal to amountAMin");
+      assert.isAtMost(amountAActual.toNumber(), amountADesired.toNumber(), "amountAActual is less than or equal to amountADesired");
+      assert.isAtMost(amountBActual.toNumber(), amountBDesired.toNumber(), "amountAActual is less than or equal to amountBDesired");
+      // Check total minted LP token of the pool and user's balance after adding liquidity second time
+      assert.equal((await _pair.totalSupply()).toNumber(), 2500000, "totalSupplyAfter equal to 2041239");
+      assert.equal(aliceLPBalance.toNumber(), 2500000 - MINIMUM_LIQUIDITY, "aliceLPBalance equal to totalSupplyAfter - MINIMUM_LIQUIDITY");
+      // Check reserves of the pool after adding liquidity second time
+      assert.equal(reservesAfter[0].toNumber(), 2500000, "reservesAfter[0] equal to 2500000");
+      assert.equal(reservesAfter[1].toNumber(), 2500000, "reservesAfter[1] equal to 2500000");
     });
   });
 
@@ -325,6 +312,7 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
       _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _token1.address)).logs[0].args.pair);
 
       await _token0.transfer(bob, 10000000, { from: owner });
+      // add liquidity to new pool
       await _router.addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice, 11571287987, {
         from: alice,
       });
@@ -332,25 +320,28 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
         from: bob,
       });
 
-      assert.equal((await _token0.balanceOf(bob)).toNumber(), 10000000 - 1000 - 997);
-      assert.equal((await _token1.balanceOf(bob)).toNumber(), 0);
-      assert.equal((await _pair.totalSupply()).toNumber(), 1000996);
-      assert.equal((await _pair.balanceOf(bob)).toNumber(), 996);
-
+      // check token balance of user
+      assert.equal((await _token0.balanceOf(bob)).toNumber(), 10000000 - 1000 - 997, "bob token0 balance equal to 9998003");
+      assert.equal((await _token1.balanceOf(bob)).toNumber(), 0, "bob token1 balance equal to 0");
+      // check total supply and lp token of user balance
+      assert.equal((await _pair.totalSupply()).toNumber(), 1000996, "total supply equal to 1000996");
+      assert.equal((await _pair.balanceOf(bob)).toNumber(), 996, "lp token balance equal to 996");
+      // check reserves
       const reserves = await _pair.getReserves(); // [_token1, _token0]
       if (_token1.address < _token0.address) {
-        assert.equal(reserves[1].toNumber(), 1001997); // balance0 = 1000000(add 1)+1000(swap)+997(add 2)
-        assert.equal(reserves[0].toNumber(), 1000000); // balance1 = 1000000(add 1)-996(swap)+996(add 2)
+        assert.equal(reserves[1].toNumber(), 1001997, "reserves[1] equal to 1001997"); // balance0 = 1000000(add 1)+1000(swap)+997(add 2)
+        assert.equal(reserves[0].toNumber(), 1000000, "reserves[0] equal to 1000000"); // balance1 = 1000000(add 1)-996(swap)+996(add 2)
       } else {
-        assert.equal(reserves[0].toNumber(), 1001997); // balance0 = 1000000(add 1)+1000(swap)+997(add 2)
-        assert.equal(reserves[1].toNumber(), 1000000); // balance1 = 1000000(add 1)-996(swap)+996(add 2)
+        assert.equal(reserves[0].toNumber(), 1001997, "reserves[0] equal to 1001997"); // balance0 = 1000000(add 1)+1000(swap)+997(add 2)
+        assert.equal(reserves[1].toNumber(), 1000000, "reserves[1] equal to 1000000"); // balance1 = 1000000(add 1)-996(swap)+996(add 2)
       }
     });
 
     it("to a new pool including ETH", async () => {
       _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _weth.address)).logs[0].args.pair);
-
+      // get user eth balance
       const balanceBeforeAdd = await web3.eth.getBalance(bob);
+      // add liquidity to new pool
       await _router.addLiquidityETH(_token0.address, 1000000, 0, 0, alice, 11571287987, {
         from: alice,
         value: "1000000",
@@ -364,20 +355,23 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
       const fee = txAddLiquidity.receipt.gasUsed * Number(gasPrice);
       const balanceAfterAdd = await web3.eth.getBalance(bob);
 
-      assert.equal((await _token0.balanceOf(bob)).toNumber(), 0);
+      assert.equal((await _token0.balanceOf(bob)).toNumber(), 0, "bob token0 balance equal to 0");
 
       const value = _BN(balanceBeforeAdd).sub(_BN(balanceAfterAdd)).sub(_BN(fee));
-      assert.equal(value, 1997); // 1000(swap) + 997 (add)
-      assert.equal((await _pair.totalSupply()).toNumber(), 1000996);
-      assert.equal((await _pair.balanceOf(bob)).toNumber(), 996);
+      // check amount eth spent for add liquidity
+      assert.equal(value, 1997, "amount ETH spent equal to 1997"); // 1000(swap) + 997 (add)
+      // check total supply and user's lp token balance
+      assert.equal((await _pair.totalSupply()).toNumber(), 1000996, "totalSupply equal to 1000996");
+      assert.equal((await _pair.balanceOf(bob)).toNumber(), 996, "bob lp token balance equal to 996");
 
+      // check reserves
       const reserves = await _pair.getReserves(); // [_weth, _token0]
       if (_weth.address < _token0.address) {
-        assert.equal(reserves[0].toNumber(), 1001997); // balanceWETH = 1000000(add 1)+1000(swap)+997(add 2)
-        assert.equal(reserves[1].toNumber(), 1000000); // balance0 = 1000000(add 1)-996(swap)+996(add 2)
+        assert.equal(reserves[0].toNumber(), 1001997, "reserves[1] equal to 1001997"); // balanceWETH = 1000000(add 1)+1000(swap)+997(add 2)
+        assert.equal(reserves[1].toNumber(), 1000000, "reserves[1] equal to 1000000"); // balance0 = 1000000(add 1)-996(swap)+996(add 2)
       } else {
-        assert.equal(reserves[1].toNumber(), 1001997); // balanceWETH = 1000000(add 1)+1000(swap)+997(add 2)
-        assert.equal(reserves[0].toNumber(), 1000000); // balance0 = 1000000(add 1)-996(swap)+996(add 2)
+        assert.equal(reserves[1].toNumber(), 1001997, "reserves[1] equal to 1001997"); // balanceWETH = 1000000(add 1)+1000(swap)+997(add 2)
+        assert.equal(reserves[0].toNumber(), 1000000, "reserves[0] equal to 1000000"); // balance0 = 1000000(add 1)-996(swap)+996(add 2)
       }
     });
   });

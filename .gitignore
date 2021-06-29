@@ -5,6 +5,7 @@
 /build
 /builds
 /types
+/bin
 
 # System
 .DS_Store
