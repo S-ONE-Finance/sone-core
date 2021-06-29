@@ -12,6 +12,8 @@ Feel free to read the code. More details coming soon.
 
 To run the project, follow these steps. You must have at least node v10 and [yarn](https://yarnpkg.com/) installed.
 
+Require [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extension if you work on vscode studio.
+
 First clone the repository:
 
 ```sh
