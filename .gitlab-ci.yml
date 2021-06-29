@@ -11,8 +11,4 @@ deploy:
     - feature/deploy
   script:
     - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
-    - echo "always-auth=true" >> .npmrc
-    - echo "emai=${EMAIL}" >> .npmrc
-    - npm install --global yarn
-    - yarn
-    - yarn publish --access public
+    - NPM_TOKEN=${NPM_TOKEN} npm publish
