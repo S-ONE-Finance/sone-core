@@ -1,0 +1,14 @@
+image: node:latest
+stages:
+  - deploy
+
+deploy:
+  tags:
+    - smart-contract
+  stage: deploy
+  environment: develop
+  only:
+    - develop
+  script:
+    - echo "//registry.npmjs.org/:_auth=${NPM_TOKEN}" > .npmrc
+    - npm publish
