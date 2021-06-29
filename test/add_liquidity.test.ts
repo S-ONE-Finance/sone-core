@@ -83,7 +83,7 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
       assert.equal(reserves[1].toNumber(), 1000000);
     });
 
-    it.only("to a existed pool excluding ETH", async () => {
+    it("to a existed pool excluding ETH", async () => {
       _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _token1.address)).logs[0].args.pair);
 
       let amountADesired: BN = _BN(1500000);
@@ -211,28 +211,106 @@ contract("SoneSwapRouter - Add Liquidity", ([alice, bob, owner]) => {
     it("to a existed pool including ETH", async () => {
       _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _weth.address)).logs[0].args.pair);
 
-      const balanceBeforeAdd = await web3.eth.getBalance(alice);
-      await _router.addLiquidityETH(_token0.address, 1000000, 0, 0, alice, 11571287987, {
-        from: alice,
-        value: "1000000",
-      });
+      const balanceBeforeCreate = await web3.eth.getBalance(alice);
+      const firstAddLiquidity = await _router.addLiquidityETH(
+        _token0.address,
+        1000000,
+        0,
+        0,
+        alice,
+        11571287987,
+        {
+          from: alice,
+          value: "1000000",
+        }
+      );
 
-      const txAddLiquidity = await _router.addLiquidityETH(_token0.address, 1000000, 0, 0, alice, 11571287987, {
-        from: alice,
-        value: "1000000",
-      });
-      const tx = await web3.eth.getTransaction(txAddLiquidity.tx);
-      const fee = txAddLiquidity.receipt.gasUsed * Number(tx.gasPrice);
+      let tx = await web3.eth.getTransaction(firstAddLiquidity.tx);
+      let fee = firstAddLiquidity.receipt.gasUsed * Number(tx.gasPrice);
+      const balanceAfterCreate = await web3.eth.getBalance(alice);
+      let value = _BN(balanceBeforeCreate)
+        .sub(_BN(balanceAfterCreate))
+        .sub(_BN(fee));
+      assert.equal(value.toNumber(), 1000000);
+      const reservesBefore = await _pair.getReserves();
+      enum Tokens {
+        CURRENCY_A = "CURRENCY_A",
+        CURRENCY_B = "CURRENCY_B",
+      }
+      const tokens: Token[] = [
+        new Token(
+          ChainId.MAINNET,
+          _token0.address,
+          (await _token0.decimals()).toNumber(),
+          await _token0.symbol(),
+          await _token0.name()
+        ),
+        new Token(
+          ChainId.MAINNET,
+          _weth.address,
+          (await _weth.decimals()).toNumber(),
+          await _weth.symbol(),
+          await _weth.name()
+        ),
+      ];
+      const pair = new Pair(
+        new TokenAmount(tokens[0], reservesBefore[0].toString()),
+        new TokenAmount(tokens[1], reservesBefore[1].toString())
+      );
+
+      const dependentTokenAmount = pair
+        .priceOf(tokens[0])
+        .quote(new TokenAmount(tokens[0], BigInt(1500000)));
+
+      const amounts: { [token in Tokens]: CurrencyAmount } = {
+        [Tokens.CURRENCY_A]: new TokenAmount(tokens[0], BigInt(1500000)),
+        [Tokens.CURRENCY_B]: new TokenAmount(
+          tokens[1],
+          dependentTokenAmount.raw
+        ),
+      };
+      const allowedSlippage = 100; // 1%
+      const amountsMin = {
+        [Tokens.CURRENCY_A]: calculateSlippageAmount(
+          amounts.CURRENCY_A,
+          allowedSlippage
+        )[0],
+        [Tokens.CURRENCY_B]: calculateSlippageAmount(
+          amounts.CURRENCY_B,
+          allowedSlippage
+        )[0],
+      };
+
+      let amountADesired = _BN(amounts.CURRENCY_A.numerator.toString());
+      let amountAMin = _BN(amountsMin.CURRENCY_A.toString());
+      let amountBMin = _BN(amountsMin.CURRENCY_B.toString());
+
+      const txAddLiquidity = await _router.addLiquidityETH(
+        _token0.address,
+        amountADesired,
+        amountAMin,
+        amountBMin,
+        alice,
+        11571287987,
+        {
+          from: alice,
+          value: "1500000",
+        }
+      );
+      tx = await web3.eth.getTransaction(txAddLiquidity.tx);
+      fee = txAddLiquidity.receipt.gasUsed * Number(tx.gasPrice);
       const balanceAfterAdd = await web3.eth.getBalance(alice);
-
-      const value = _BN(balanceBeforeAdd).sub(_BN(balanceAfterAdd)).sub(_BN(fee));
-      assert.equal(value, 1000000);
-      assert.equal((await _pair.totalSupply()).toNumber(), 1000000);
-      assert.equal((await _pair.balanceOf(alice)).toNumber(), 1000000 - MINIMUM_LIQUIDITY);
+      value = _BN(balanceAfterCreate).sub(_BN(balanceAfterAdd)).sub(_BN(fee));
+      assert.equal(value.toNumber(), 1500000);
+      assert.equal((await _pair.totalSupply()).toNumber(), 2500000);
+      assert.equal(
+        (await _pair.balanceOf(alice)).toNumber(),
+        2500000 - MINIMUM_LIQUIDITY
+      );
 
       const reserves = await _pair.getReserves();
-      assert.equal(reserves[0].toNumber(), 1000000);
-      assert.equal(reserves[1].toNumber(), 1000000);
+      assert.equal(reserves[0].toNumber(), 2500000);
+      assert.equal(reserves[1].toNumber(), 2500000);
     });
   });
 
