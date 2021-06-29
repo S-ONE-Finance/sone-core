@@ -2,6 +2,7 @@
 pragma solidity =0.6.12;
 
 import './uniswapv2/UniswapV2Router02.sol';
+import './interfaces/ISoneConvert.sol';
 
 contract SoneSwapRouter is UniswapV2Router02{
     constructor(address factory_, address WETH_) 
