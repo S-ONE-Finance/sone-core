@@ -1,42 +1,62 @@
 pragma solidity >=0.6.2;
 
-import '../uniswapv2/interfaces/IUniswapV2Router02.sol';
+import "../uniswapv2/interfaces/IUniswapV2Router02.sol";
 
 interface ISoneSwapRouter is IUniswapV2Router02 {
-    function swapExactTokensForTokensNoFee(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
+	function swapExactTokensForTokensNoFee(
+		uint256 amountIn,
+		uint256 amountOutMin,
+		address[] calldata path,
+		address to,
+		uint256 deadline
+	) external returns (uint256[] memory amounts);
 
-    function addLiquidityOneToken(
-        uint amountIn,
-        uint amountAMin,
-        uint amountBMin,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint amountA, uint amountB, uint liquidity);
+	function addLiquidityOneToken(
+		uint256 amountIn,
+		uint256 amountAMin,
+		uint256 amountBMin,
+		uint256 amountOutMin,
+		address[] calldata path,
+		address to,
+		uint256 deadline
+	)
+		external
+		returns (
+			uint256 amountA,
+			uint256 amountB,
+			uint256 liquidity
+		);
 
-    function addLiquidityOneTokenETHExactETH(
-        uint amountTokenMin,
-        uint amountETHMin,
-        uint amountOutTokenMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
+	function addLiquidityOneTokenETHExactETH(
+		uint256 amountTokenMin,
+		uint256 amountETHMin,
+		uint256 amountOutTokenMin,
+		address[] calldata path,
+		address to,
+		uint256 deadline
+	)
+		external
+		payable
+		returns (
+			uint256 amountToken,
+			uint256 amountETH,
+			uint256 liquidity
+		);
 
-    function addLiquidityOneTokenETHExactToken(
-        uint amountIn,
-        uint amountTokenMin,
-        uint amountETHMin,
-        uint amountOutETHMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
+	function addLiquidityOneTokenETHExactToken(
+		uint256 amountIn,
+		uint256 amountTokenMin,
+		uint256 amountETHMin,
+		uint256 amountOutETHMin,
+		address[] calldata path,
+		address to,
+		uint256 deadline
+	)
+		external
+		payable
+		returns (
+			uint256 amountToken,
+			uint256 amountETH,
+			uint256 liquidity
+		);
 }

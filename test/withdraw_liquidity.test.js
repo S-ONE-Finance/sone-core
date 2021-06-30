@@ -9,7 +9,7 @@ const SoneToken = artifacts.require('SoneToken')
 const SoneSwapRouter = artifacts.require('SoneSwapRouter')
 const SoneConvert = artifacts.require('SoneConvert')
 
-const revertMsg = require("./constants/exceptions.js").revertMsg;
+const revertMsg = require("./constants/error-msg.js").revertMsg;
 
 var BN = (s) => new BigNumber(s.toString(), 10)
 

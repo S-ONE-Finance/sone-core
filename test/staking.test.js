@@ -18,7 +18,7 @@ const UniswapV2Pair = artifacts.require('UniswapV2Pair')
 const SoneSwapRouter = artifacts.require('SoneSwapRouter')
 const SoneMasterFarmer = artifacts.require('SoneMasterFarmer')
 
-const revertMsg = require("./constants/exceptions.js").revertMsg;
+const revertMsg = require("./constants/error-msg.js").revertMsg;
 const SoneTokenInferface = require('../build/contracts/ISoneToken.json')
 
 // var BN = (s) => new BigNumber(s.toString(), 10)

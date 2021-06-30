@@ -1,7 +1,14 @@
 {
-  "solidity.compileUsingRemoteVersion": "v0.6.12+commit.27d51765",
   "editor.tabSize": 2,
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "typescript.updateImportsOnFileMove.enabled": "always"
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "solidity.compileUsingRemoteVersion": "v0.6.12+commit.27d51765",
+  "solidity.linter": "solhint",
+  "solidity.enabledAsYouTypeCompilationErrorCheck": true,
+  "solidity.validationDelay": 1500,
+  "solidity.packageDefaultDependenciesDirectory": "node_modules",
+  "mochaExplorer.files": "test/**/*.{j,t}s",
+  "mochaExplorer.fullTrace": true,
+  "mochaExplorer.exit": true
 }
