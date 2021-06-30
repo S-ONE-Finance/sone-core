@@ -8,11 +8,23 @@ In-depth documentation on this SDK is available at [s-one.finance](http://docs.s
 
 Feel free to read the code. More details coming soon.
 
-## Running
+## Prerequisite
 
 To run the project, follow these steps. You must have at least node v10 and [yarn](https://yarnpkg.com/) installed.
 
 Require [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) extension if you work on vscode studio.
+
+```sh
+code --install-extension JuanBlanco.solidity
+```
+
+VSCode is not familiar with the solidity language, so solidity support needs to be installed.
+
+```sh
+code --install-extension esbenp.prettier-vscode
+```
+
+## Running
 
 First clone the repository:
 
