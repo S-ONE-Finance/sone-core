@@ -42,7 +42,7 @@ contract('SoneSwapRouter - Withdraw Liquidity', ([alice, bob, owner]) => {
       from: owner,
     })
     _soneToken = await SoneToken.new(1, 1000, { from: owner })
-    _soneConvert = await SoneConvert.new(process.env.SONE_ADDRESS as string, _weth.address, _factory.address, _router.address, {
+    _soneConvert = await SoneConvert.new(_soneToken.address, _weth.address, _factory.address, _router.address, {
       from: owner,
     })
     _token0 = await MockERC20.new('TOKEN0', 'TOKEN0', '50000000', {
@@ -51,7 +51,7 @@ contract('SoneSwapRouter - Withdraw Liquidity', ([alice, bob, owner]) => {
     _token1 = await MockERC20.new('TOKEN1', 'TOKEN1', '50000000', {
       from: owner,
     })
-    await _factory.setSoneConvert(_soneConvert.address)
+    await _factory.setSoneConvert(_soneConvert.address, { from: owner })
     // Get pool address of the pair token0-token1
     _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _token1.address)).logs[0].args.pair)
     const blkNumber = await web3.eth.getBlockNumber()
