@@ -1,5 +1,17 @@
 import BN from 'bn.js'
-import { CurrencyAmount, Token, TokenAmount, Pair, ChainId, JSBI } from '@s-one-finance/sdk-core'
+import {
+  CurrencyAmount,
+  Token,
+  TokenAmount,
+  Pair,
+  ChainId,
+  JSBI,
+  Trade,
+  Currency,
+  Route,
+  TradeType,
+  Percent,
+} from '@s-one-finance/sdk-core'
 import {
   MockERC20Instance,
   SoneSwapRouterInstance,
@@ -301,14 +313,14 @@ contract('SoneSwapRouter - Add Liquidity', ([alice, bob, owner]) => {
     })
   })
 
-  describe('# add liquidity with 1 token', async () => {
+  describe.only('# add liquidity with 1 token', async () => {
     beforeEach(async () => {
       // Appove allowance to spend bob's tokens for the _router
       await _token0.approve(_router.address, 1000000, { from: bob })
       await _token1.approve(_router.address, 1000000, { from: bob })
     })
 
-    it('to a new pool excluding ETH', async () => {
+    it.only('to a existed pool excluding ETH', async () => {
       _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _token1.address)).logs[0].args.pair)
 
       await _token0.transfer(bob, 10000000, { from: owner })
@@ -316,7 +328,58 @@ contract('SoneSwapRouter - Add Liquidity', ([alice, bob, owner]) => {
       await _router.addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice, 11571287987, {
         from: alice,
       })
-      await _router.addLiquidityOneToken(2000, 0, 0, 0, [_token0.address, _token1.address], bob, 11571287987, {
+
+      enum Tokens {
+        CURRENCY_A = 'CURRENCY_A',
+        CURRENCY_B = 'CURRENCY_B',
+      }
+      const tokens: Token[] = [
+        new Token(ChainId.MAINNET, _token0.address, (await _token0.decimals()).toNumber(), await _token0.symbol(), await _token0.name()),
+        new Token(ChainId.MAINNET, _token1.address, (await _token1.decimals()).toNumber(), await _token1.symbol(), await _token1.name()),
+      ]
+      const reservesBefore = await _pair.getReserves()
+      const pair = new Pair(
+        new TokenAmount(tokens[0], reservesBefore[0].toString()),
+        new TokenAmount(tokens[1], reservesBefore[1].toString())
+      )
+      const wrappedUserInputParsedAmount = new TokenAmount(tokens[0], BigInt(20000))
+      // get amountOutDesired
+      const [, theOtherTokenParsedAmount] = pair.getAmountsAddOneToken(wrappedUserInputParsedAmount)
+      const allowedSlippage = 100 // 1%
+      const BIPS_BASE = JSBI.BigInt(10000)
+      const allowedSlippagePercent = new Percent(JSBI.BigInt(allowedSlippage), BIPS_BASE)
+      const trade = new Trade(new Route([pair], tokens[0]), new TokenAmount(tokens[0], JSBI.BigInt(10000)), TradeType.EXACT_INPUT)
+      // get amountOutMin
+      const amountOutMin = trade.minimumAmountOut(allowedSlippagePercent).raw.toString()
+        console.log(theOtherTokenParsedAmount.raw.toString(), amountOutMin);
+        
+      const pairDesired = new Pair(
+        new TokenAmount(tokens[0], (10000 + reservesBefore[0].toNumber()).toString()),
+        new TokenAmount(tokens[1], (reservesBefore[1].toNumber() - Number(theOtherTokenParsedAmount.raw.toString())).toString())
+      )
+      const amountAddDesired = pairDesired
+        .priceOf(tokens[1])
+        .quote(new TokenAmount(tokens[1], String(10000)))
+
+      const pairMin = new Pair(
+        new TokenAmount(tokens[0], (10000 + reservesBefore[0].toNumber()).toString()),
+        new TokenAmount(tokens[1], (reservesBefore[1].toNumber() - Number(amountOutMin)).toString())
+      )
+      const amountAddMin = pairMin
+      .priceOf(tokens[1])
+      .quote(new TokenAmount(tokens[1], String(10000)))
+      console.log('desired',amountAddDesired.raw.toString())
+      console.log('min',amountAddMin.raw.toString())
+
+      const amounts: { [token in Tokens]: CurrencyAmount } = {
+        [Tokens.CURRENCY_A]: new TokenAmount(tokens[0], BigInt(1010000)),
+        [Tokens.CURRENCY_B]: new TokenAmount(tokens[1], BigInt(1000000 + Number(amountAddMin.raw.toString()))),
+      }
+      let amountAMin = _BN(calculateSlippageAmount(amounts.CURRENCY_A, allowedSlippage)[0].toString())
+      let amountBMin = _BN(calculateSlippageAmount(amounts.CURRENCY_B, allowedSlippage)[0].toString())
+      console.log(amountAMin.toNumber())
+      console.log(amountBMin.toNumber())
+      await _router.addLiquidityOneToken(20000, amountAMin, amountBMin, amountOutMin, [_token0.address, _token1.address], bob, 11571287987, {
         from: bob,
       })
 
@@ -337,7 +400,7 @@ contract('SoneSwapRouter - Add Liquidity', ([alice, bob, owner]) => {
       }
     })
 
-    it('to a new pool including ETH', async () => {
+    it('to a existed pool including ETH', async () => {
       _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _weth.address)).logs[0].args.pair)
       // get user eth balance
       const balanceBeforeAdd = await web3.eth.getBalance(bob)
@@ -346,6 +409,20 @@ contract('SoneSwapRouter - Add Liquidity', ([alice, bob, owner]) => {
         from: alice,
         value: '1000000',
       })
+
+      enum Tokens {
+        CURRENCY_A = 'CURRENCY_A',
+        CURRENCY_B = 'CURRENCY_B',
+      }
+      const tokens: Token[] = [
+        new Token(ChainId.MAINNET, _token0.address, (await _token0.decimals()).toNumber(), await _token0.symbol(), await _token0.name()),
+        new Token(ChainId.MAINNET, _token1.address, (await _token1.decimals()).toNumber(), await _token1.symbol(), await _token1.name()),
+      ]
+      const reservesBefore = await _pair.getReserves()
+      const pair = new Pair(
+        new TokenAmount(tokens[0], reservesBefore[0].toString()),
+        new TokenAmount(tokens[1], reservesBefore[1].toString())
+      )
       const txAddLiquidity = await _router.addLiquidityOneTokenETHExactETH(0, 0, 0, [_weth.address, _token0.address], bob, 11571287987, {
         from: bob,
         value: '2000',
