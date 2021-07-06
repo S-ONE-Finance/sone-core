@@ -8,7 +8,9 @@ deploy:
   stage: deploy
   environment: develop
   only:
-    - develop
+    - feature/deploy
   script:
+    - yarn
+    - yarn compile
     - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
     - NPM_TOKEN=${NPM_TOKEN} npm publish
