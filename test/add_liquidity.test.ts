@@ -308,7 +308,7 @@ contract('SoneSwapRouter - Add Liquidity', ([alice, bob, owner]) => {
       await _token1.approve(_router.address, 1000000, { from: bob })
     })
 
-    it('to a new pool excluding ETH', async () => {
+    it('to a existed pool excluding ETH', async () => {
       _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _token1.address)).logs[0].args.pair)
 
       await _token0.transfer(bob, 10000000, { from: owner })
