@@ -73,7 +73,7 @@ contract SoneMasterFarmer is Ownable {
 	// The block number when SONE mining starts.
 	uint256 public START_BLOCK;
 
-	uint256 public constant PERCENT_LOCK_BONUS_REWARD = 75; // lock 75% of bounus reward in 1 year
+	uint256 public constant PERCENT_LOCK_BONUS_REWARD = 75; // lock 75% of bonus reward in 1 year
 	uint256 public constant PERCENT_FOR_DEV = 10; // 10% reward for dev
 
 	// The migrator contract. It has a lot of power. Can only be set through governance (owner).
@@ -263,7 +263,7 @@ contract SoneMasterFarmer is Ownable {
 		_harvest(_pid);
 	}
 
-	// lock 75% of reward if it come from bounus time
+	// lock 75% of reward if it come from bonus time
 	function _harvest(uint256 _pid) internal {
 		PoolInfo storage pool = poolInfo[_pid];
 		UserInfo storage user = userInfo[_pid][msg.sender];
@@ -293,7 +293,7 @@ contract SoneMasterFarmer is Ownable {
 		}
 	}
 
-	// Deposit LP tokens to SoneMasterFarmer for SUSHI allocation.
+	// Deposit LP tokens to SoneMasterFarmer for SONE allocation.
 	function deposit(uint256 _pid, uint256 _amount) public {
 		require(_amount > 0, "SoneMasterFarmer::deposit: amount must be greater than 0");
 

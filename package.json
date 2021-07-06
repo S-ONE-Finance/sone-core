@@ -6,7 +6,8 @@
   "files": [
     "build",
     "contracts",
-    "test"
+    "test",
+    "!test/deployment"
   ],
   "license": "MIT",
   "repository": "https://github.com/S-ONE-Finance/soneswap-core.git",
@@ -35,14 +36,11 @@
     "deploy-stake:rinkeby": "yarn truffle migrate -f 3 --to 3 --network rinkeby",
     "test": "yarn truffle test"
   },
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "@openzeppelin/contracts": "^3.1.0",
     "@openzeppelin/test-helpers": "^0.5.11",
     "@truffle/hdwallet-provider": "^1.2.1",
-    "truffle": "^5.1.44",
-    "truffle-hdwallet-provider": "^1.0.17"
-  },
-  "devDependencies": {
     "@ethersproject/address": "^5.3.0",
     "@ethersproject/contracts": "^5.3.0",
     "@ethersproject/networks": "^5.3.1",
@@ -60,6 +58,8 @@
     "rimraf": "^3.0.2",
     "solhint": "^3.3.6",
     "solhint-plugin-prettier": "^0.0.5",
+    "truffle": "^5.1.44",
+    "truffle-hdwallet-provider": "^1.0.17",
     "truffle-flattener": "^1.4.4",
     "ts-node": "^10.0.0",
     "typechain": "^5.0.0",
