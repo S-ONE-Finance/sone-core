@@ -343,45 +343,34 @@ contract('SoneSwapRouter - Add Liquidity', ([alice, bob, owner]) => {
         new TokenAmount(tokens[1], reservesBefore[1].toString())
       )
       const wrappedUserInputParsedAmount = new TokenAmount(tokens[0], BigInt(20000))
-      // get amountOutDesired
       const [, theOtherTokenParsedAmount] = pair.getAmountsAddOneToken(wrappedUserInputParsedAmount)
       const allowedSlippage = 100 // 1%
-      const BIPS_BASE = JSBI.BigInt(10000)
-      const allowedSlippagePercent = new Percent(JSBI.BigInt(allowedSlippage), BIPS_BASE)
-      const trade = new Trade(new Route([pair], tokens[0]), new TokenAmount(tokens[0], JSBI.BigInt(10000)), TradeType.EXACT_INPUT)
-      // get amountOutMin
-      const amountOutMin = trade.minimumAmountOut(allowedSlippagePercent).raw.toString()
-        console.log(theOtherTokenParsedAmount.raw.toString(), amountOutMin);
-        
-      const pairDesired = new Pair(
-        new TokenAmount(tokens[0], (10000 + reservesBefore[0].toNumber()).toString()),
-        new TokenAmount(tokens[1], (reservesBefore[1].toNumber() - Number(theOtherTokenParsedAmount.raw.toString())).toString())
-      )
-      const amountAddDesired = pairDesired
-        .priceOf(tokens[1])
-        .quote(new TokenAmount(tokens[1], String(10000)))
-
-      const pairMin = new Pair(
-        new TokenAmount(tokens[0], (10000 + reservesBefore[0].toNumber()).toString()),
-        new TokenAmount(tokens[1], (reservesBefore[1].toNumber() - Number(amountOutMin)).toString())
-      )
-      const amountAddMin = pairMin
-      .priceOf(tokens[1])
-      .quote(new TokenAmount(tokens[1], String(10000)))
-      console.log('desired',amountAddDesired.raw.toString())
-      console.log('min',amountAddMin.raw.toString())
+      let amountOutMin = _BN(calculateSlippageAmount(theOtherTokenParsedAmount, allowedSlippage)[0].toString())
 
       const amounts: { [token in Tokens]: CurrencyAmount } = {
-        [Tokens.CURRENCY_A]: new TokenAmount(tokens[0], BigInt(1010000)),
-        [Tokens.CURRENCY_B]: new TokenAmount(tokens[1], BigInt(1000000 + Number(amountAddMin.raw.toString()))),
+        [Tokens.CURRENCY_A]: new TokenAmount(tokens[0], BigInt(10000)),
+        [Tokens.CURRENCY_B]: new TokenAmount(tokens[1], BigInt(amountOutMin.toNumber())),
       }
       let amountAMin = _BN(calculateSlippageAmount(amounts.CURRENCY_A, allowedSlippage)[0].toString())
       let amountBMin = _BN(calculateSlippageAmount(amounts.CURRENCY_B, allowedSlippage)[0].toString())
-      console.log(amountAMin.toNumber())
-      console.log(amountBMin.toNumber())
-      await _router.addLiquidityOneToken(20000, amountAMin, amountBMin, amountOutMin, [_token0.address, _token1.address], bob, 11571287987, {
-        from: bob,
-      })
+      console.log('amountAMin :>> ', amountAMin.toNumber())
+      console.log('amountBMin :>> ', amountBMin.toNumber())
+      
+      await _router.addLiquidityOneToken(
+        20000,
+        amountAMin,
+        amountBMin,
+        amountOutMin,
+        [_token0.address, _token1.address],
+        bob,
+        11571287987,
+        {
+          from: bob,
+        }
+      )
+
+      console.log('used B amount :>> ', await (await _token1.balanceOf(bob)).toNumber())
+      return
 
       // check token balance of user
       assert.equal((await _token0.balanceOf(bob)).toNumber(), 10000000 - 1000 - 997, 'bob token0 balance equal to 9998003')
