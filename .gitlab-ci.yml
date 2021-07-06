@@ -8,7 +8,7 @@ deploy:
   stage: deploy
   environment: develop
   only:
-    - feature/deploy
+    - develop
   script:
     - yarn
     - yarn compile
