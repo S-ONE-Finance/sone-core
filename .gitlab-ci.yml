@@ -10,5 +10,7 @@ deploy:
   only:
     - develop
   script:
+    - yarn
+    - yarn compile
     - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
     - NPM_TOKEN=${NPM_TOKEN} npm publish
