@@ -14,6 +14,8 @@ contract UniswapV2Factory is IUniswapV2Factory {
     address public override feeSetter;
     address public override migrator;
 
+    address public override soneConvert;
+
     mapping(address => mapping(address => address)) public override getPair;
     address[] public override allPairs;
 
@@ -73,5 +75,10 @@ contract UniswapV2Factory is IUniswapV2Factory {
         require(1 <= _swapFee, "UniswapV2: invalid swap fee"); // 0.1% = 1/1000
         require(6 >= _swapFee, "UniswapV2: invalid swap fee"); // 0.6% = 6/1000
         swapFee = _swapFee;
+    }
+
+     function setSoneConvert(address _soneConvert) external override{
+        require(msg.sender == feeSetter, 'UniswapV2: FORBIDDEN');
+        soneConvert = _soneConvert;
     }
 }

@@ -9,7 +9,6 @@ import './libraries/UQ112x112.sol';
 import './interfaces/IUniswapV2Factory.sol';
 import './interfaces/IUniswapV2Callee.sol';
 
-
 interface IMigrator {
     // Return the desired amount of liquidity token that the migrator wants.
     function desiredLiquidity() external view returns (uint256);
@@ -95,7 +94,6 @@ contract UniswapV2Pair is UniswapV2ERC20 {
     // if fee is on, mint liquidity equivalent to 1/6th of the growth in sqrt(k)
     function _mintFee(uint112 _reserve0, uint112 _reserve1) private returns (bool feeOn) {
         address feeTo = IUniswapV2Factory(factory).feeTo();
-        uint fee = IUniswapV2Factory(factory).swapFee();
         feeOn = feeTo != address(0);
         uint _kLast = kLast; // gas savings
         if (feeOn) {
@@ -104,9 +102,16 @@ contract UniswapV2Pair is UniswapV2ERC20 {
                 uint rootKLast = Math.sqrt(_kLast);
                 if (rootK > rootKLast) {
                     uint numerator = totalSupply.mul(rootK.sub(rootKLast));
-                    uint denominator = rootK.mul(fee * 2 - 1).add(rootKLast);
+                    uint denominator = rootK.mul(2).add(rootKLast);
                     uint liquidity = numerator / denominator;
-                    if (liquidity > 0) _mint(feeTo, liquidity);
+                   if (liquidity > 0 && msg.sender != IUniswapV2Factory(factory).soneConvert()) {
+                        if (liquidity.div(2) > 0) {
+                            _mint(feeTo, liquidity.div(2));
+                            if(IUniswapV2Factory(factory).soneConvert() != address(0)){
+                                _mint(IUniswapV2Factory(factory).soneConvert(), liquidity.div(2));
+                            }
+                        }
+                    }
                 }
             }
         } else if (_kLast != 0) {
@@ -176,7 +181,9 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         uint _totalSupply = totalSupply; // gas savings, must be defined here since totalSupply can update in _mintFee
         amount0 = liquidity.mul(balance0) / _totalSupply; // using balances ensures pro-rata distribution
         amount1 = liquidity.mul(balance1) / _totalSupply; // using balances ensures pro-rata distribution
-        require(amount0 > 0 && amount1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED');
+        if(msg.sender != IUniswapV2Factory(factory).soneConvert()){
+            require(amount0 > 0 && amount1 > 0, 'UniswapV2: INSUFFICIENT_LIQUIDITY_BURNED');
+        }
         _burn(address(this), liquidity);
         _safeTransfer(_token0, to, amount0);
         _safeTransfer(_token1, to, amount1);

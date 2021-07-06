@@ -1,10 +1,28 @@
+# Dependencies
 /node_modules/
-/build/
-/builds/
+
+# Build
+/build
+/types
+/bin
+
+# System
 .DS_Store
-deploy.js
-deploy.sh
-sushiswap-master
-zscript
-truffle-config.js
+
+# Runtime
+*.log
+
+# IDE
 .idea
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Ignore all local history of files
+**/.history
+
+# Privacy
+.env

@@ -1,15 +1,28 @@
 const UniswapV2Factory = artifacts.require("UniswapV2Factory");
-const UniswapV2Router02 = artifacts.require("UniswapV2Router02");
+const SoneSwapRouter = artifacts.require("SoneSwapRouter");
 
-// address of fee setter
-const feeSetterAddress = "0xAe7fD93a1419dee1376c0b9E27C969E85679AFd2";
-// address of WETH
-const wethAddress = "0xc778417E063141139Fce010982780140Aa0cD5Ab";
+
+const feeSetterAddress = process.env.FEE_SETTER_ADDRESS; // address of fee setter
+const wethAddress = process.env.WETH_ADDRESS; // address of WETH
 
 module.exports = async function (deployer) {
   // deploy factory
-  await deployer.deploy(UniswapV2Factory, feeSetterAddress);
+  await deployer.deploy(
+    UniswapV2Factory,
+    feeSetterAddress,
+    // {
+    //   overwrite: false
+    // }
+  );
+
   // deploy router
   const factory = await UniswapV2Factory.deployed();
-  await deployer.deploy(UniswapV2Router02, factory.address, wethAddress);
-};
+  await deployer.deploy(
+    SoneSwapRouter,
+    factory.address,
+    wethAddress,
+    // {
+    //   overwrite: false
+    // }
+  );
+}

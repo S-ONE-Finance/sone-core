@@ -1,10 +1,13 @@
 {
   "name": "@s-one-finance/core",
   "description": "🛠 Smart Contract for S-ONE Finance Swap.",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "main": "index.js",
   "files": [
-    "build"
+    "build",
+    "contracts",
+    "test",
+    "!test/deployment"
   ],
   "license": "MIT",
   "repository": "https://github.com/S-ONE-Finance/soneswap-core.git",
@@ -14,22 +17,52 @@
     "uniswap",
     "sushiswap"
   ],
-  "dependencies": {
-    "@openzeppelin/contracts": "^3.1.0",
-    "@openzeppelin/test-helpers": "^0.5.6",
-    "@truffle/hdwallet-provider": "^1.2.1",
-    "ethereumjs-util": "^6.2.0",
-    "truffle": "^5.1.44",
-    "truffle-flattener": "^1.4.4",
-    "truffle-hdwallet-provider": "^1.0.17",
-    "web3": "^1.2.6"
-  },
   "scripts": {
+    "precompile": "rimraf build",
     "compile": "yarn truffle compile",
-    "deploy-swap-local": "yarn truffle migrate -f 2 --to 2 --network dev",
-    "deploy-weth-local": "yarn truffle migrate -f 3 --to 3 --network dev",
-    "deploy-stake-local": "yarn truffle migrate -f 4 --to 4 --network dev",
-    "deploy-swap-ropsten": "yarn truffle migrate -f 2 --to 2 --network ropsten",
-    "deploy-stake-ropsten": "yarn truffle migrate -f 4 --to 4 --network ropsten"
+    "generate-types": "npx typechain --target=truffle-v5 'build/contracts/*.json'",
+    "postinstall": "npx truffle compile && npm run generate-types",
+    "prettier:write": "prettier --write test/**/*.{js,ts} && prettier --write contracts/**/*.sol",
+    "flatten": "./scripts/generate-flatten.sh",
+    "deploy-weth:local": "yarn truffle migrate -f 4 --to 4 --network dev",
+    "deploy:local": "yarn truffle migrate --to 3 --network dev",
+    "deploy:ropsten": "yarn truffle migrate --to 3 --network ropsten",
+    "deploy:rinkeby": "yarn truffle migrate --to 3 --network rinkeby",
+    "deploy-swap:local": "yarn truffle migrate -f 2 --to 2 --network dev",
+    "deploy-swap:ropsten": "yarn truffle migrate -f 2 --to 2 --network ropsten",
+    "deploy-swap:rinkeby": "yarn truffle migrate -f 2 --to 2 --network rinkeby",
+    "deploy-stake:local": "yarn truffle migrate -f 3 --to 3 --network dev",
+    "deploy-stake:ropsten": "yarn truffle migrate -f 3 --to 3 --network ropsten",
+    "deploy-stake:rinkeby": "yarn truffle migrate -f 3 --to 3 --network rinkeby",
+    "test": "yarn truffle test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@openzeppelin/contracts": "^3.1.0",
+    "@openzeppelin/test-helpers": "^0.5.11",
+    "@truffle/hdwallet-provider": "^1.2.1",
+    "@ethersproject/address": "^5.3.0",
+    "@ethersproject/contracts": "^5.3.0",
+    "@ethersproject/networks": "^5.3.1",
+    "@ethersproject/providers": "^5.3.1",
+    "@ethersproject/solidity": "^5.3.0",
+    "@s-one-finance/sdk-core": "^1.0.11",
+    "@typechain/truffle-v5": "^5.0.0",
+    "@types/chai": "^4.2.19",
+    "@types/mocha": "^8.2.2",
+    "dotenv": "^8.2.0",
+    "ethereumjs-util": "^6.2.0",
+    "mocha": "^6.2.2",
+    "prettier": "^2.3.2",
+    "prettier-plugin-solidity": "^1.0.0-beta.13",
+    "rimraf": "^3.0.2",
+    "solhint": "^3.3.6",
+    "solhint-plugin-prettier": "^0.0.5",
+    "truffle": "^5.1.44",
+    "truffle-hdwallet-provider": "^1.0.17",
+    "truffle-flattener": "^1.4.4",
+    "ts-node": "^10.0.0",
+    "typechain": "^5.0.0",
+    "typescript": "^4.3.4"
   }
 }
