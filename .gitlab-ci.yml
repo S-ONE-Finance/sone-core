@@ -9,6 +9,7 @@ deploy:
   environment: develop
   only:
     - develop
+    # - feature/deploy
   script:
     - yarn
     - yarn compile
