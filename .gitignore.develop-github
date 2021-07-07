@@ -1,0 +1,27 @@
+# Dependencies
+/node_modules/
+
+# Build
+/build
+/types
+/bin
+
+# System
+.DS_Store
+
+# Runtime
+*.log
+
+# IDE
+.idea
+### VisualStudioCode ###
+.vscode
+
+# Ignore all local history of files
+**/.history
+
+# Privacy
+.env
+.gitlab-ci.yml
+.npmrc
+.gitignore.*
