@@ -1,17 +1,5 @@
 import BN from 'bn.js'
-import {
-  CurrencyAmount,
-  Token,
-  TokenAmount,
-  Pair,
-  ChainId,
-  JSBI,
-  Trade,
-  Currency,
-  Route,
-  TradeType,
-  Percent,
-} from '@s-one-finance/sdk-core'
+import { CurrencyAmount, Token, TokenAmount, Pair, ChainId, JSBI } from '@s-one-finance/sdk-core'
 import {
   MockERC20Instance,
   SoneSwapRouterInstance,
@@ -33,7 +21,7 @@ function decimalize(amount: number, decimals: number): bigint {
   return BigInt(amount) * BigInt(10) ** BigInt(decimals)
 }
 
-contract('SoneSwapRouter - Add Liquidity', ([alice, bob, owner]) => {
+contract('SoneSwapRouter - Add Liquidity', ([owner, alice, bob]) => {
   let _weth: WETH9Instance
   let _factory: UniswapV2FactoryInstance
   let _router: SoneSwapRouterInstance
@@ -313,22 +301,22 @@ contract('SoneSwapRouter - Add Liquidity', ([alice, bob, owner]) => {
     })
   })
 
-  describe.only('# add liquidity with 1 token', async () => {
+  describe('# add liquidity with 1 token', async () => {
     beforeEach(async () => {
       // Appove allowance to spend bob's tokens for the _router
       await _token0.approve(_router.address, 1000000, { from: bob })
       await _token1.approve(_router.address, 1000000, { from: bob })
     })
 
-    it.only('to a existed pool excluding ETH', async () => {
+    it('to a existed pool excluding ETH', async () => {
       _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _token1.address)).logs[0].args.pair)
 
       await _token0.transfer(bob, 10000000, { from: owner })
       // add liquidity to new pool
-      await _router.addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice, 11571287987, {
+      await _router.addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, ali  e, 11571287987, {
         from: alice,
       })
-
+      // prepare for add liquidity one mode
       enum Tokens {
         CURRENCY_A = 'CURRENCY_A',
         CURRENCY_B = 'CURRENCY_B',
@@ -353,9 +341,7 @@ contract('SoneSwapRouter - Add Liquidity', ([alice, bob, owner]) => {
       }
       let amountAMin = _BN(calculateSlippageAmount(amounts.CURRENCY_A, allowedSlippage)[0].toString())
       let amountBMin = _BN(calculateSlippageAmount(amounts.CURRENCY_B, allowedSlippage)[0].toString())
-      console.log('amountAMin :>> ', amountAMin.toNumber())
-      console.log('amountBMin :>> ', amountBMin.toNumber())
-      
+
       await _router.addLiquidityOneToken(
         20000,
         amountAMin,
@@ -368,29 +354,25 @@ contract('SoneSwapRouter - Add Liquidity', ([alice, bob, owner]) => {
           from: bob,
         }
       )
-
-      console.log('used B amount :>> ', await (await _token1.balanceOf(bob)).toNumber())
-      return
-
       // check token balance of user
-      assert.equal((await _token0.balanceOf(bob)).toNumber(), 10000000 - 1000 - 997, 'bob token0 balance equal to 9998003')
-      assert.equal((await _token1.balanceOf(bob)).toNumber(), 0, 'bob token1 balance equal to 0')
+      assert.equal((await _token0.balanceOf(bob)).toNumber(), 10000000 - 20000, 'bob token0 balance equal to 9980000')
+      assert.equal((await _token1.balanceOf(bob)).toNumber(), 68, 'bob token1 balance equal to 68') // swap -9871 add 9803
       // check total supply and lp token of user balance
-      assert.equal((await _pair.totalSupply()).toNumber(), 1000996, 'total supply equal to 1000996')
-      assert.equal((await _pair.balanceOf(bob)).toNumber(), 996, 'lp token balance equal to 996')
+      assert.equal((await _pair.totalSupply()).toNumber(), 1009900, 'total supply equal to 1009900')
+      assert.equal((await _pair.balanceOf(bob)).toNumber(), 9900, 'lp token balance equal to 9900')
       // check reserves
       const reserves = await _pair.getReserves() // [_token1, _token0]
       if (_token1.address < _token0.address) {
-        assert.equal(reserves[1].toNumber(), 1001997, 'reserves[1] equal to 1001997') // balance0 = 1000000(add 1)+1000(swap)+997(add 2)
-        assert.equal(reserves[0].toNumber(), 1000000, 'reserves[0] equal to 1000000') // balance1 = 1000000(add 1)-996(swap)+996(add 2)
+        assert.equal(reserves[1].toNumber(), 1020000, 'reserves[1] equal to 1020000') // balance1 = 1000000(add 1)+10000(swap)+10000(add 2)
+        assert.equal(reserves[0].toNumber(), 999932, 'reserves[0] equal to 999932') // balance0 = 1000000(add 1)-9871(swap)+9803(add 2)
       } else {
-        assert.equal(reserves[0].toNumber(), 1001997, 'reserves[0] equal to 1001997') // balance0 = 1000000(add 1)+1000(swap)+997(add 2)
-        assert.equal(reserves[1].toNumber(), 1000000, 'reserves[1] equal to 1000000') // balance1 = 1000000(add 1)-996(swap)+996(add 2)
+        assert.equal(reserves[0].toNumber(), 1020000, 'reserves[0] equal to 1020000') // balance0 = 1000000(add 1)+10000(swap)+10000(add 2)
+        assert.equal(reserves[1].toNumber(), 999932, 'reserves[1] equal to 999932') // balance1 = 1000000(add 1)-9871(swap)+9803(add 2)
       }
     })
 
     it('to a existed pool including ETH', async () => {
-      _pair = await UniswapV2Pair.at((await _factory.createPair(_token0.address, _weth.address)).logs[0].args.pair)
+      _pair = await UniswapV2Pair.at((await _factory.createPair(_weth.address, _token0.address)).logs[0].args.pair)
       // get user eth balance
       const balanceBeforeAdd = await web3.eth.getBalance(bob)
       // add liquidity to new pool
@@ -398,46 +380,65 @@ contract('SoneSwapRouter - Add Liquidity', ([alice, bob, owner]) => {
         from: alice,
         value: '1000000',
       })
-
+      // prepare for add liquidity one mode
       enum Tokens {
         CURRENCY_A = 'CURRENCY_A',
         CURRENCY_B = 'CURRENCY_B',
       }
       const tokens: Token[] = [
+        new Token(ChainId.MAINNET, _weth.address, (await _weth.decimals()).toNumber(), await _weth.symbol(), await _weth.name()),
         new Token(ChainId.MAINNET, _token0.address, (await _token0.decimals()).toNumber(), await _token0.symbol(), await _token0.name()),
-        new Token(ChainId.MAINNET, _token1.address, (await _token1.decimals()).toNumber(), await _token1.symbol(), await _token1.name()),
       ]
       const reservesBefore = await _pair.getReserves()
       const pair = new Pair(
         new TokenAmount(tokens[0], reservesBefore[0].toString()),
         new TokenAmount(tokens[1], reservesBefore[1].toString())
       )
-      const txAddLiquidity = await _router.addLiquidityOneTokenETHExactETH(0, 0, 0, [_weth.address, _token0.address], bob, 11571287987, {
-        from: bob,
-        value: '2000',
-      })
+      const wrappedUserInputParsedAmount = new TokenAmount(tokens[0], BigInt(20000))
+      const [, theOtherTokenParsedAmount] = pair.getAmountsAddOneToken(wrappedUserInputParsedAmount)
+      const allowedSlippage = 100 // 1%
+      let amountOutMin = _BN(calculateSlippageAmount(theOtherTokenParsedAmount, allowedSlippage)[0].toString())
+
+      const amounts: { [token in Tokens]: CurrencyAmount } = {
+        [Tokens.CURRENCY_A]: new TokenAmount(tokens[0], BigInt(10000)),
+        [Tokens.CURRENCY_B]: new TokenAmount(tokens[1], BigInt(amountOutMin.toNumber())),
+      }
+      let amountAMin = _BN(calculateSlippageAmount(amounts.CURRENCY_A, allowedSlippage)[0].toString())
+      let amountBMin = _BN(calculateSlippageAmount(amounts.CURRENCY_B, allowedSlippage)[0].toString())
+      const txAddLiquidity = await _router.addLiquidityOneTokenETHExactETH(
+        amountBMin,
+        amountAMin,
+        amountOutMin,
+        [_weth.address, _token0.address],
+        bob,
+        11571287987,
+        {
+          from: bob,
+          value: '20000',
+        }
+      )
       const tx = await web3.eth.getTransaction(txAddLiquidity.tx)
       const gasPrice = tx.gasPrice
       const fee = txAddLiquidity.receipt.gasUsed * Number(gasPrice)
       const balanceAfterAdd = await web3.eth.getBalance(bob)
 
-      assert.equal((await _token0.balanceOf(bob)).toNumber(), 0, 'bob token0 balance equal to 0')
-
+      // check user token0 balance
+      assert.equal((await _token0.balanceOf(bob)).toNumber(), 68, 'bob token0 balance equal to 68')
       const value = _BN(balanceBeforeAdd).sub(_BN(balanceAfterAdd)).sub(_BN(fee))
       // check amount eth spent for add liquidity
-      assert.equal(value.toNumber(), 1997, 'amount ETH spent equal to 1997') // 1000(swap) + 997 (add)
+      assert.equal(value.toNumber(), 20000, 'amount ETH spent equal to 20000') // 10000(swap) + 10000 (add)
       // check total supply and user's lp token balance
-      assert.equal((await _pair.totalSupply()).toNumber(), 1000996, 'totalSupply equal to 1000996')
-      assert.equal((await _pair.balanceOf(bob)).toNumber(), 996, 'bob lp token balance equal to 996')
+      assert.equal((await _pair.totalSupply()).toNumber(), 1009900, 'totalSupply equal to 1009900')
+      assert.equal((await _pair.balanceOf(bob)).toNumber(), 9900, 'bob lp token balance equal to 9900')
 
       // check reserves
       const reserves = await _pair.getReserves() // [_weth, _token0]
       if (_weth.address < _token0.address) {
-        assert.equal(reserves[0].toNumber(), 1001997, 'reserves[1] equal to 1001997') // balanceWETH = 1000000(add 1)+1000(swap)+997(add 2)
-        assert.equal(reserves[1].toNumber(), 1000000, 'reserves[1] equal to 1000000') // balance0 = 1000000(add 1)-996(swap)+996(add 2)
+        assert.equal(reserves[0].toNumber(), 1020000, 'reserves[0] equal to 1020000') // balanceWETH = 1000000(add 1)+10000(swap)+10000(add 2)
+        assert.equal(reserves[1].toNumber(), 999932, 'reserves[1] equal to 999932') // balance0 = 1000000(add 1)-9871(swap)+9803(add 2)
       } else {
-        assert.equal(reserves[1].toNumber(), 1001997, 'reserves[1] equal to 1001997') // balanceWETH = 1000000(add 1)+1000(swap)+997(add 2)
-        assert.equal(reserves[0].toNumber(), 1000000, 'reserves[0] equal to 1000000') // balance0 = 1000000(add 1)-996(swap)+996(add 2)
+        assert.equal(reserves[1].toNumber(), 1020000, 'reserves[1] equal to 1020000') // balanceWETH = 1000000(add 1)+10000(swap)+10000(add 2)
+        assert.equal(reserves[0].toNumber(), 999932, 'reserves[0] equal to 999932') // balance0 = 1000000(add 1)-9871(swap)+9803(add 2)
       }
     })
   })

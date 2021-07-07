@@ -24,7 +24,7 @@ const _BN = (str: string | number) => new BN(str)
 
 const MINIMUM_LIQUIDITY = 1000
 
-contract('SoneSwapRouter - Withdraw Liquidity', ([alice, bob, owner]) => {
+contract('SoneSwapRouter - Withdraw Liquidity', ([owner, alice, bob]) => {
   let _weth: WETH9Instance
   let _factory: UniswapV2FactoryInstance
   let _router: SoneSwapRouterInstance
@@ -240,7 +240,7 @@ contract('SoneSwapRouter - Withdraw Liquidity', ([alice, bob, owner]) => {
     })
   })
 
-  describe.only('# withdraw liquidity with sone convert', async () => {
+  describe('# withdraw liquidity with sone convert', async () => {
     beforeEach(async () => {
       // Transfer tokens to bob address
       await _token0.transfer(bob, 10000000, { from: owner })
@@ -288,12 +288,10 @@ contract('SoneSwapRouter - Withdraw Liquidity', ([alice, bob, owner]) => {
       console.log('pair reserves[1] :>> ', (await _pair.getReserves())[1].toNumber())
 
       console.log(`bob's LP token :>> `, (await _pair.balanceOf(bob)).toNumber())
-      console.log(`bob's LP poolshare :>> `, ((await _pair.balanceOf(bob)).toNumber() / (await _pair.totalSupply()).toNumber()) * 100)
       // Remove liquidity
       await _pair.approve(_router.address, 1000000, { from: bob })
       await _router.removeLiquidity(_token0.address, _token1.address, 1000000, 0, 0, bob, 11571287987, { from: bob })
       // check bob tokens balance
-      console.log('_token0.balanceOf(bob)', (await _token0.balanceOf(bob)).toNumber())
 
       assert.equal((await _token0.balanceOf(bob)).toNumber(), 10014491, "Bob's token0 balance equal to 10014491") //  9000000 (balance) + 1014491 (remove liquid)
       assert.equal((await _token1.balanceOf(bob)).toNumber(), 9985750, "Bob's token1 balance equal to 9985750") // 9000000 (balance) + 985750 (remove liquid)
