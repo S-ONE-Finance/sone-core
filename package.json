@@ -1,0 +1,39 @@
+{
+  "name": "erc-20_tokens",
+  "description": "🛠 Smart Contract for ERC-20 tokens",
+  "version": "0.0.1",
+  "main": "index.js",
+  "files": [
+    "build",
+    "contracts",
+    "test",
+    "constants"
+  ],
+  "license": "MIT",
+  "repository": "",
+  "keywords": [
+    "danielpham"
+  ],
+  "dependencies": {},
+  "scripts": {
+    "precompile": "rimraf build",
+    "compile": "yarn truffle compile",
+    "flatten": "./scripts/generate-flatten.sh"
+  },
+  "devDependencies": {
+    "@openzeppelin/contracts": "^3.1.0",
+    "@openzeppelin/test-helpers": "^0.5.11",
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "chai": "^4.3.4",
+    "dotenv": "^8.2.0",
+    "ethereum-waffle": "^3.4.0",
+    "ethereumjs-util": "^6.2.0",
+    "ethers": "^5.4.0",
+    "hardhat": "^2.4.0",
+    "mocha": "^6.2.2",
+    "rimraf": "^3.0.2",
+    "ts-node": "^10.0.0",
+    "typescript": "^4.3.4"
+  }
+}

@@ -1,0 +1,30 @@
+# Dependencies
+/node_modules/
+
+# Build
+/build
+/builds
+/cache
+/artifacts
+
+# System
+.DS_Store
+
+# Runtime
+*.log
+
+# IDE
+.idea
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+### VisualStudioCode Patch ###
+# Ignore all local history of files
+**/.history
+
+# Privacy
+.env
