@@ -65,7 +65,7 @@ contract SoneMasterFarmer is Ownable {
 	address public devaddr;
 	// SONE tokens created per block.
 	uint256 public REWARD_PER_BLOCK;
-	// Bonus muliplier for early SONE makers.
+	// Bonus multiplier for early SONE makers.
 	uint256[] public REWARD_MULTIPLIER = [32, 32, 32, 32, 16, 8, 4, 2, 1];
 	uint256[] public HALVING_AT_BLOCK; // init in constructor function
 	uint256 public FINISH_BONUS_AT_BLOCK;
@@ -84,7 +84,7 @@ contract SoneMasterFarmer is Ownable {
 	mapping(address => uint256) public poolId1; // poolId1 count from 1, subtraction 1 before using with poolInfo
 	// Info of each user that stakes LP tokens. pid => user address => info
 	mapping(uint256 => mapping(address => UserInfo)) public userInfo;
-	// Total allocation poitns. Must be the sum of all allocation points in all pools.
+	// Total allocation points. Must be the sum of all allocation points in all pools.
 	uint256 public totalAllocPoint = 0;
 
 	event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
