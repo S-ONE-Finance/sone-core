@@ -22,7 +22,7 @@ const SoneMasterFarmer = artifacts.require('SoneMasterFarmer')
 
 const revertMsg = require('./constants/error-msg.js').revertMsg
 
-contract('staking', ([alice, dev, owner]) => {
+contract('staking', ([owner, alice, dev]) => {
   let _weth: WETH9Instance
   let _factory: UniswapV2FactoryInstance
   let _router: SoneSwapRouterInstance
@@ -63,6 +63,7 @@ contract('staking', ([alice, dev, owner]) => {
   })
   describe('#check set migrator', async () => {
     it('success', async () => {
+      // set migrator for masterFarmer
       await _soneMasterFarmer.setMigrator(_migrator.address, { from: owner })
       const migrator = await _soneMasterFarmer.migrator()
       // check migrator address
@@ -88,7 +89,7 @@ contract('staking', ([alice, dev, owner]) => {
       // deposit amount of lp token to farm
       await _soneMasterFarmer.deposit(0, 999000, { from: alice })
     })
-    it('exception already set', async () => {
+    it('exception no migrator', async () => {
       await expectRevert(_soneMasterFarmer.migrate(0, { from: owner }), revertMsg.NOT_EXIST_MIGRATOR)
     })
     it('exception migrate bad', async () => {
