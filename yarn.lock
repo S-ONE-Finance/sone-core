@@ -1627,23 +1627,17 @@
     debug "^3.1.0"
     hosted-git-info "^2.6.0"
 
-"@s-one-finance/core@^0.0.6":
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/@s-one-finance/core/-/core-0.0.6.tgz#3f02a43f5ae679dff4c4ba8ddd7d48c9df7c6f64"
-  integrity sha512-BTt2yp4guizMLN2weqVja8jYZuvyAyznYx9yVmEUhAjWmDjIKrhhfxxNI4TAojpb16VIQ5xhatvzKZGauveeVw==
-  dependencies:
-    "@openzeppelin/contracts" "^3.1.0"
-    "@openzeppelin/test-helpers" "^0.5.11"
-    "@truffle/hdwallet-provider" "^1.2.1"
-    truffle "^5.1.44"
-    truffle-hdwallet-provider "^1.0.17"
+"@s-one-finance/core@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@s-one-finance/core/-/core-0.1.2.tgz#eb119973fdb27ae62e10462985a8feb884b3b2a7"
+  integrity sha512-lqljc25HWeOqiH+Mx1KVCyOdnqnniown8cEIEm2c8yQteso7gFbqohUI1U59Xny008tI+FyaZUD4IF/kR5QO3A==
 
-"@s-one-finance/sdk-core@^1.0.11":
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/@s-one-finance/sdk-core/-/sdk-core-1.0.11.tgz#5fac2eefdf4bcb2608dbc7a0a358c2b3380c4020"
-  integrity sha512-yoCgxlX/Xl3YAA2qeQ3D/w/nlKySWOT3psvvoP6UKopSODZgSnF8R6lJJw/PUW0iArzK7xEWPGWXW+KM2q00BA==
+"@s-one-finance/sdk-core@^1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@s-one-finance/sdk-core/-/sdk-core-1.1.2.tgz#93b2eaf21e627fc925f38fd7e9f63f287e63d488"
+  integrity sha512-MlrbvAGrFOVJHRch1ZvjaaecZFsjPBbKgHdXZfLW7mKXJyBYb6lc7Pm4xwauEDkOp6O9puDy9NCrT1IykMvC1g==
   dependencies:
-    "@s-one-finance/core" "^0.0.6"
+    "@s-one-finance/core" "^0.1.2"
     big.js "^5.2.2"
     decimal.js-light "^2.5.0"
     jsbi "^3.1.1"
