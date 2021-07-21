@@ -5,9 +5,10 @@
 // Runtime Environment's members available in the global scope.
 // const hre = require("hardhat");
 
-import { BigNumber } from 'ethers';
 import { run, ethers } from 'hardhat'
-import { multiplize } from "src/tasks/utils";
+
+import soneSwap from 'src/deployments/sone-swap.json'
+import tokens from 'src/deployments/erc-20-tokens.json'
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -19,23 +20,13 @@ async function main() {
 
   // const accounts = await ethers.get
   // We get the contract to deploy
-  var decimalPlaces = 6
-  var amount = multiplize(decimalPlaces, BigNumber.from(5000000000))
 
-  const USDT = await ethers.getContractFactory('TetherToken')
-  const usdt = await USDT.deploy(amount, 'TetherToken', 'USDT', decimalPlaces)
-  const usdc = await USDT.deploy(amount, 'USD Coin', 'USDC', decimalPlaces)
-  decimalPlaces = 18
-  amount = multiplize(decimalPlaces, BigNumber.from(5000000000))
-  const dai = await USDT.deploy(BigInt(amount), 'DAI', 'DAI', decimalPlaces)
+  const Router = await ethers.getContractFactory('SoneSwapRouter')
+  const router = await Router.deploy(soneSwap.Factory, tokens.WETH)
 
-  await usdt.deployed()
-  await usdc.deployed()
-  await dai.deployed()
+  await router.deployed()
 
-  console.log('USDT deployed to:', usdt.address)
-  console.log('USDC deployed to:', usdc.address)
-  console.log('DAI deployed to:', dai.address)
+  console.log('router deployed to:', router.address)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

@@ -18,7 +18,7 @@ async function main() {
   // const accounts = await ethers.get
   // We get the contract to deploy
   const USDC = await ethers.getContractFactory('FaucetToken')
-  const usdc = await USDC.deploy(1000000000000000, 'FaucetToken', 'USDC', 6)
+  const usdc = await USDC.deploy(1000000000000000, 'FaucetToken', 6, 'USDC')
 
   await usdc.deployed()
 

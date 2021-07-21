@@ -2,25 +2,18 @@ import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
 import '@typechain/hardhat'
 import { HardhatUserConfig } from 'hardhat/config'
+import dotenv from 'dotenv'
 import 'tsconfig-paths/register' // This adds support for typescript paths mappings
 
 import './src/tasks'
 
-// This is a sample Hardhat task. To learn how to create your own go to
-// https://hardhat.org/guides/create-task.html
-// task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
-//   const accounts = await hre.ethers.getSigners()
-
-//   for (const account of accounts) {
-//     console.log(account.address)
-//   }
-// })
+dotenv.config()
 
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
   // Your type-safe config goes here
-  defaultNetwork: 'localhost',
+  defaultNetwork: 'private',
   networks: {
     hardhat: {
       allowUnlimitedContractSize: false,
@@ -29,22 +22,25 @@ const config: HardhatUserConfig = {
       url: `http://localhost:8545`,
       allowUnlimitedContractSize: false,
     },
+    private: {
+      url: `https://ganache.s-one.finance`,
+    },
     mainnet: {
-      url: `https://mainnet.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      url: `https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
     },
     ropsten: {
-      url: `https://ropsten.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      url: `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
       accounts: ['4c54f0453dc294005ba7c38944e84074c9e69399d06f8f60109de627fc678fdd'],
     },
     rinkeby: {
-      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      url: `https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
       accounts: ['4c54f0453dc294005ba7c38944e84074c9e69399d06f8f60109de627fc678fdd'],
     },
     goerli: {
-      url: `https://goerli.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      url: `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
     },
     kovan: {
-      url: `https://kovan.infura.io/v3/${process.env.INFURA_API_KEY}`,
+      url: `https://kovan.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
     },
   },
   solidity: {
@@ -57,6 +53,21 @@ const config: HardhatUserConfig = {
       },
       {
         version: '0.6.12',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
+      },
+      {
+        version: '0.8.0',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 1000,
+          },
+        },
       },
     ],
   },
