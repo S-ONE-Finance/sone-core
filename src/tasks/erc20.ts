@@ -1,13 +1,43 @@
 import { BigNumber } from 'ethers'
-import { task } from 'hardhat/config'
+import { task, types } from 'hardhat/config'
 
 import erc20 from 'src/abi/ERC-20.json'
 import tokens from 'src/deployments/erc-20-tokens.json'
-import { ERC20, TetherToken } from 'src/types'
+import { ERC20, TetherToken, UniswapV2ERC20__factory } from 'src/types'
 
 import { accountToSigner, getDecimalizedBalance, tokenNameToAddress, decimalize } from 'src/tasks/utils'
 
-task('transfer-token', `Transfer a token from an account 'from' to another account 'to'`)
+task('erc20:token-balance', 'Get token balance of an account')
+  .addParam('tokenAddress', `The token address`)
+  .addParam('tokenDecimals', `The token decimals`)
+  .addParam('account', `The account's address`)
+  .setAction(async (taskArgs, hre) => {
+    const signer = (await accountToSigner(hre, taskArgs.account))?.[0]
+    const tokenAddress = tokenNameToAddress(taskArgs.tokenAddress)?.[0]
+
+    const contract = new hre.ethers.Contract(tokenAddress, erc20.abi, signer) as ERC20
+
+    const balance = await getDecimalizedBalance(contract, taskArgs.tokenDecimals, signer.address)
+    console.log('balance :>> ', balance.toString())
+  })
+
+task('erc20:approve', 'ERC20 approve')
+  .addParam('from', 'From address')
+  .addParam('token', 'Token')
+  .addParam('spender', 'Spender')
+  .addOptionalParam('amount', 'Approval amount', Number.MAX_SAFE_INTEGER.toString(), types.string)
+  .setAction(async ({ from, token, spender, amount }, hre) => {
+    const [fromSigner, spenderSigner] = await accountToSigner(hre, from, spender)
+    const [tokenAddress] = tokenNameToAddress(token)
+    const tokenContract = UniswapV2ERC20__factory.connect(tokenAddress, fromSigner)
+    await (
+      await tokenContract.approve(spenderSigner.address, BigNumber.from(amount), {
+        from: fromSigner.address,
+      })
+    ).wait()
+  })
+
+task('erc20:transfer-token', `Transfer a token from an account 'from' to another account 'to'`)
   .addParam('tokenAddress', `The contract address of a token: 'usdt', 'usdc', 'dai' or an token address`)
   .addParam('tokenDecimals', `Token decimals`)
   .addParam('from', `The account is sender: 'owner', 'alice', 'bob' or an address`)
