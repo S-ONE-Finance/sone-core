@@ -5,7 +5,9 @@
 // Runtime Environment's members available in the global scope.
 // const hre = require("hardhat");
 
+import { BigNumber } from 'ethers'
 import { run, ethers } from 'hardhat'
+import { multiplize } from 'src/tasks/utils'
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -17,12 +19,15 @@ async function main() {
 
   // const accounts = await ethers.get
   // We get the contract to deploy
-  const USDC = await ethers.getContractFactory('FaucetToken')
-  const usdc = await USDC.deploy(1000000000000000, 'FaucetToken', 6, 'USDC')
+  var decimalPlaces = 18
 
-  await usdc.deployed()
+  const SONE = await ethers.getContractFactory('FaucetToken')
+  decimalPlaces = 18
+  // const sone = await SONE.deploy(BigInt(amount), 'DAI', decimalPlaces, 'DAI')
 
-  console.log('USDC deployed to:', usdc.address)
+  // await sone.deployed()
+
+  // console.log('SONE deployed to:', sone.address)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
