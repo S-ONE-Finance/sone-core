@@ -1,5 +1,5 @@
 import './accounts'
 import './network'
-import './call-token'
-// import './factory'
+import './erc20'
+import './factory'
 import './router'

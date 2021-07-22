@@ -23,7 +23,12 @@ const config: HardhatUserConfig = {
       allowUnlimitedContractSize: false,
     },
     private: {
-      url: `https://ganache.s-one.finance`,
+      url: `https://private-net.s-one.finance`,
+      accounts: [
+        process.env.PRIVATE_OPERATOR_PRIVATE_KEY as string,
+        '0xcadbe0586fb7b800b1d94d5b5ca5c7765419adbad1f5a21c94f36023112b3e85',
+        '0x9811566962d584d506458555d88616c7c3e8e0365332bd6a543f9c37209efa19',
+      ],
     },
     mainnet: {
       url: `https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
@@ -74,7 +79,7 @@ const config: HardhatUserConfig = {
   typechain: {
     outDir: 'src/types',
     target: 'ethers-v5',
-    alwaysGenerateOverloads: false, // should overloads with full signatures like deposit(uint256) be generated always, even if there are no overloads?
+    alwaysGenerateOverloads: true, // should overloads with full signatures like deposit(uint256) be generated always, even if there are no overloads?
     // externalArtifacts: ['externalArtifacts/*.json'], // optional array of glob patterns with external artifacts to process (for example external libs from node_modules)
   },
   paths: {

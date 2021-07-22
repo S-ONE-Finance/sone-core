@@ -5,9 +5,9 @@
 // Runtime Environment's members available in the global scope.
 // const hre = require("hardhat");
 
-import { BigNumber } from 'ethers';
+import { BigNumber } from 'ethers'
 import { run, ethers } from 'hardhat'
-import { multiplize } from "src/tasks/utils";
+import { multiplize } from 'src/tasks/utils'
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -22,12 +22,12 @@ async function main() {
   var decimalPlaces = 6
   var amount = multiplize(decimalPlaces, BigNumber.from(5000000000))
 
-  const USDT = await ethers.getContractFactory('TetherToken')
-  const usdt = await USDT.deploy(amount, 'TetherToken', 'USDT', decimalPlaces)
-  const usdc = await USDT.deploy(amount, 'USD Coin', 'USDC', decimalPlaces)
+  const USDT = await ethers.getContractFactory('FaucetToken')
+  const usdt = await USDT.deploy(amount, 'TetherToken', decimalPlaces, 'USDT')
+  const usdc = await USDT.deploy(amount, 'USD Coin', decimalPlaces, 'USDC')
   decimalPlaces = 18
   amount = multiplize(decimalPlaces, BigNumber.from(5000000000))
-  const dai = await USDT.deploy(BigInt(amount), 'DAI', 'DAI', decimalPlaces)
+  const dai = await USDT.deploy(BigInt(amount), 'DAI', decimalPlaces, 'DAI')
 
   await usdt.deployed()
   await usdc.deployed()
