@@ -60,32 +60,40 @@ describe('SoneSwapRouter - Withdraw Liquidity', () => {
       'TOKEN1',
       50000000,
     ])) as MockERC20
-    await _factory.connect(owner).setSoneConvert(_soneConvert.address)
-    // Get pool address of the pair token0-token1
-    await _factory.createPair(_token0.address, _token1.address)
-    const pairAddress = await _factory.getPair(_token0.address, _token1.address)
-    _pair = UniswapV2Pair__factory.connect(pairAddress, owner)
-    const blkNumber = await ethers.provider.getBlockNumber()
-    await _soneToken.setAllowTransferOn(blkNumber + 1)
-    // Transfer tokens to alice address
-    await _token0.connect(owner).transfer(alice.address, 10000000)
-    await _token1.connect(owner).transfer(alice.address, 10000000)
+    console.log(111)
+    await _factory.setSoneConvert(_soneConvert.address)
+    console.log(222)
 
-    // Approve allowance to spend alice's tokens for the router
-    await _token0.connect(alice).approve(_router.address, 1000000)
-    await _token1.connect(alice).approve(_router.address, 1000000)
+    // Get pool address of the pair token0-token1
+    await _factory['createPair(address,address)'](_token0.address, _token1.address)
+    // console.log(333)
+
+    const pairAddress = await _factory.getPair(_token0.address, _token1.address)
+    console.log(pairAddress);
+    
+    // _pair = UniswapV2Pair__factory.connect(pairAddress, owner)
+    // const blkNumber = await ethers.provider.getBlockNumber()
+    // await _soneToken.setAllowTransferOn(blkNumber + 1)
+    // // Transfer tokens to alice address
+    // await _token0.connect(owner).transfer(alice.address, 10000000)
+    // await _token1.connect(owner).transfer(alice.address, 10000000)
+
+    // // Approve allowance to spend alice's tokens for the router
+    // await _token0.connect(alice).approve(_router.address, 1000000)
+    // await _token1.connect(alice).approve(_router.address, 1000000)
   })
 
   describe('# withdraw liquidity in a pool excluding ETH', async () => {
-    beforeEach(async () => {
-      // add liquidity to new pool
-      await _router
-        .connect(alice)
-        .addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987)
-    })
+    // beforeEach(async () => {
+    //   // add liquidity to new pool
+    //   await _router
+    //     .connect(alice)
+    //     .addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987)
+    // })
     it.only('burn without fee', async () => {
       // Approve allowance to spend alice's lp token for the router
       await _pair.connect(alice).approve(_router.address, 1000000 - MINIMUM_LIQUIDITY)
+
       // check alice lp token balance
       assert.equal(
         (await _pair.balanceOf(alice.address)).valueOf(),
