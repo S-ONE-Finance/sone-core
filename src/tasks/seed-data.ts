@@ -37,6 +37,10 @@ task('seed:token-balance', 'Transfer usdt, usdc, dai to alice and bob', async (_
     tokenAddress: 'dai',
     tokenDecimals: '18',
   })
+  await hre.run('sonetoken:mint', {
+    to: 'alice',
+    amount: '10000000000000000000', // 1e19
+  })
   // Bob
   await hre.run('erc20:transfer-token', {
     from: 'owner',
@@ -55,5 +59,23 @@ task('seed:token-balance', 'Transfer usdt, usdc, dai to alice and bob', async (_
     to: 'bob',
     tokenAddress: 'dai',
     tokenDecimals: '18',
+  })
+  // Owner
+  await hre.run('sonetoken:mint', {
+    to: 'owner',
+    amount: '10000000000000000000', // 1e19
+  })
+})
+
+task('seed:liquidity-usdt-sone', 'Add liquidity', async (_taskArgs, hre) => {
+  // Owner
+  await hre.run('router:add-liquidity', {
+    selectedToken: 'sone',
+    theOtherToken: 'usdt',
+    selectedTokenDesired: '1000000000000000000', //1e18
+    theOtherTokenDesired: '1000000000000000000', //1e18
+    selectedTokenMinimum: '0',
+    theOtherTokenMinimum: '0',
+    to: 'owner',
   })
 })

@@ -14,8 +14,8 @@ import {
 import { BigNumber } from 'ethers'
 
 task('router:add-liquidity', 'Router add liquidity')
-  .addParam('selectedToken', `Token A address: 'usdt', 'usdc', 'dai' or another token address`)
-  .addParam('theOtherToken', `Token B address: 'usdt', 'usdc', 'dai' or another token address`)
+  .addParam('selectedToken', `Token A address: 'usdt', 'usdc', 'dai', 'sone' or another token address`)
+  .addParam('theOtherToken', `Token B address: 'usdt', 'usdc', 'dai', 'sone' or another token address`)
   .addParam('selectedTokenDesired', 'Token A Desired')
   .addParam('theOtherTokenDesired', 'Token B Desired')
   .addParam('selectedTokenMinimum', 'Token A Minimum')
@@ -56,6 +56,10 @@ task('router:add-liquidity', 'Router add liquidity')
       console.log('theOtherTokenAddress :>> ', theOtherTokenAddress)
       console.log('selectedTokenDesired :>> ', selectedTokenDesired)
       console.log('theOtherTokenDesired :>> ', theOtherTokenDesired)
+      console.log('selectedTokenMinimum :>> ', selectedTokenMinimum)
+      console.log('theOtherTokenMinimum :>> ', theOtherTokenMinimum)
+      console.log('toSigner :>> ', toSigner.address)
+      console.log('deadline :>> ', deadline)
       await (
         await router.addLiquidity(
           selectedTokenAddress,

@@ -4,6 +4,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types'
 
 import erc20 from 'src/abi/ERC-20.json'
 import tokens from 'src/deployments/erc-20-tokens.json'
+import contractAddress from 'src/deployments/sone-swap.json'
 import { ERC20, TetherToken } from 'src/types'
 
 export const getDecimalizedBalance = async (contract: ERC20, decimal: number, address: string): Promise<string> => {
@@ -55,6 +56,8 @@ export const tokenNameToAddress = (...names: string[]): string[] => {
       addresses.push(tokens.USDC)
     } else if (name.search('dai') != -1) {
       addresses.push(tokens.DAI)
+    } else if (name.search('sone') != -1) {
+      addresses.push(contractAddress.SONE)
     } else {
       addresses.push(name)
     }
