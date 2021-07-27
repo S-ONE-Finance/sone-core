@@ -11,6 +11,7 @@ import { ethers, artifacts, waffle } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 require('dotenv').config()
 import { assert, expect } from 'chai'
+
 import {
   WETH9,
   UniswapV2Factory,
@@ -63,30 +64,29 @@ describe('staking', function () {
     await _factory.createPair(_token0.address, _token1.address)
     const pairAddress = await _factory.getPair(_token0.address, _token1.address)
     _pair = UniswapV2Pair__factory.connect(pairAddress, owner)
-    _soneToken = (await deployContract(owner, await artifacts.readArtifact('SoneToken'), [1, 1000])) as SoneToken
+    _soneToken = (await deployContract(owner, await artifacts.readArtifact('SoneToken'))) as SoneToken
+    await _soneToken.connect(owner).__SoneToken_init(1, 1000)
+
     _soneMasterFarmer = (await deployContract(owner, await artifacts.readArtifact('SoneMasterFarmer'), [
       _soneToken.address,
-      dev,
+      dev.address,
       5,
       1,
       720,
     ])) as SoneMasterFarmer
+
     const blkNumber = await ethers.provider.getBlockNumber()
-    await _soneToken.setAllowTransferOn(blkNumber + 1, { from: owner.address })
-    _soneToken.transferOwnership(_soneMasterFarmer.address, { from: owner.address })
+    await _soneToken.connect(owner).setAllowTransferOn(blkNumber + 1)
+    await _soneToken.connect(owner).transferOwnership(_soneMasterFarmer.address)
   })
   afterEach(async () => {
-    await _soneMasterFarmer.transferOwnershipSoneToken(alice.address, {
-      from: owner.address,
-    })
+    await _soneMasterFarmer.connect(owner).transferOwnershipSoneToken(alice.address)
   })
 
   describe('#add pool', async () => {
     it('success', async () => {
       // add new lp token to pool with allocation point
-      await _soneMasterFarmer.add(10, _pair.address, true, {
-        from: owner.address,
-      })
+      await _soneMasterFarmer.connect(owner).add(10, _pair.address, true)
       // check num of pool and total allocation point of all pools
       assert.equal((await _soneMasterFarmer.poolLength()).valueOf(), 1, 'soneMasterFarmer has 1 pool')
       assert.equal(
@@ -101,27 +101,25 @@ describe('staking', function () {
     })
     // expect msg inform not have right to add token to pool
     it('exception not owner', async () => {
-      await expect(_soneMasterFarmer.add(10, _pair.address, true, { from: alice.address }), revertMsg.NOT_OWNER)
+      await expect(_soneMasterFarmer.connect(alice).add(10, _pair.address, true)).to.be.revertedWith(
+        revertMsg.NOT_OWNER
+      )
     })
     // expect msg for adding existed pool
     it('exception pool already exist', async () => {
-      await _soneMasterFarmer.add(10, _pair.address, true, {
-        from: owner.address,
-      })
-      await expect(_soneMasterFarmer.add(10, _pair.address, true, { from: owner.address })).to.be.revertedWith(
-        revertMsg.POOL_ALREADY_EXIT
+      await _soneMasterFarmer.connect(owner).add(10, _pair.address, true)
+      await expect(_soneMasterFarmer.connect(owner).add(10, _pair.address, true)).to.be.revertedWith(
+        revertMsg.POOL_ALREADY_EXIST
       )
     })
   })
   describe('#update pool', async () => {
     beforeEach(async () => {
-      await _soneMasterFarmer.add(10, _pair.address, true, {
-        from: owner.address,
-      })
+      await _soneMasterFarmer.connect(owner).add(10, _pair.address, true)
     })
     it('success', async () => {
       // update first pool
-      await _soneMasterFarmer.set(0, 20, true, { from: owner.address })
+      await _soneMasterFarmer.connect(owner).set(0, 20, true)
       // check num of pool and total alloc point after update for masterfarmer
       assert.equal((await _soneMasterFarmer.poolLength()).valueOf(), 1, 'soneMasterFarmer has 1 pool')
       assert.equal(
@@ -136,25 +134,19 @@ describe('staking', function () {
     })
     // check update first pool not by the owner
     it('exception not owner', async () => {
-      await expect(_soneMasterFarmer.set(0, 10, true, { from: alice.address })).to.be.revertedWith(revertMsg.NOT_OWNER)
+      await expect(_soneMasterFarmer.connect(alice).set(0, 10, true)).to.be.revertedWith(revertMsg.NOT_OWNER)
     })
   })
   describe('#deposit', async () => {
     beforeEach(async () => {
       // add new pair to pool
-      await _soneMasterFarmer.add(10, _pair.address, true, {
-        from: owner.address,
-      })
+      await _soneMasterFarmer.connect(owner).add(10, _pair.address, true)
       // Approve allowance to spend alice's tokens for the _router
-      await _token0.approve(_router.address, 10000000, { from: alice.address })
-      await _token1.approve(_router.address, 10000000, { from: alice.address })
+      await _token0.connect(alice).approve(_router.address, 10000000)
+      await _token1.connect(alice).approve(_router.address, 10000000)
       // add liquidity
-      await _router.addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987, {
-        from: alice.address,
-      })
-      await _router.addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987, {
-        from: alice.address,
-      })
+      await _router.connect(alice).addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987)
+      await _router.connect(alice).addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987)
     })
     it('success', async () => {
       // get sone balance at addresses
@@ -162,12 +154,10 @@ describe('staking', function () {
       const balanceSoneTokenBefore = await _soneToken.balanceOf(_soneToken.address)
       const balanceSoneAliceBefore = await _soneToken.balanceOf(alice.address)
       // Approve allowance to spend alice's lp token for the _soneMasterFarmer
-      await _pair.approve(_soneMasterFarmer.address, 10000000, {
-        from: alice.address,
-      })
+      await _pair.connect(alice).approve(_soneMasterFarmer.address, 10000000)
       // deposit lp token from alice
-      await _soneMasterFarmer.deposit(0, 999000, { from: alice.address })
-      await _soneMasterFarmer.deposit(0, 1000000, { from: alice.address })
+      await _soneMasterFarmer.connect(alice).deposit(0, 999000)
+      await _soneMasterFarmer.connect(alice).deposit(0, 1000000)
       // get sone balance at addresses after deposits
       const balanceDevAfter = await _soneToken.balanceOf(dev.address)
       const balanceSoneTokenAfter = await _soneToken.balanceOf(_soneToken.address)
@@ -188,30 +178,24 @@ describe('staking', function () {
     })
     // check deposit invalid amount(0)
     it('invalid amount', async () => {
-      await expect(_soneMasterFarmer.deposit(0, 0, { from: alice.address })).to.be.revertedWith(
-        revertMsg.INVALID_AMOUNT_DEPOSIT
-      )
+      await expect(_soneMasterFarmer.connect(alice).deposit(0, 0)).to.be.revertedWith(revertMsg.INVALID_AMOUNT_DEPOSIT)
     })
   })
   describe('#withdraw', async () => {
     beforeEach(async () => {
       // add new pair to pool
-      await _soneMasterFarmer.add(10, _pair.address, true, {
-        from: owner.address,
-      })
+      await _soneMasterFarmer.connect(owner).add(10, _pair.address, true)
       // Approve allowance to spend alice's tokens for the _router
-      await _token0.approve(_router.address, 10000000, { from: alice.address })
-      await _token1.approve(_router.address, 10000000, { from: alice.address })
+      await _token0.connect(alice).approve(_router.address, 10000000)
+      await _token1.connect(alice).approve(_router.address, 10000000)
       // add liquidity
-      await _router.addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987, {
-        from: alice.address,
-      })
+      await _router
+        .connect(alice)
+        .addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987)
       // Approve allowance to spend alice's lp token for the _soneMasterFarmer
-      await _pair.approve(_soneMasterFarmer.address, 10000000, {
-        from: alice.address,
-      })
+      await _pair.connect(alice).approve(_soneMasterFarmer.address, 10000000)
       // deposit lp token from alice
-      await _soneMasterFarmer.deposit(0, 999000, { from: alice.address })
+      await _soneMasterFarmer.connect(alice).deposit(0, 999000)
     })
     it('success', async () => {
       // get sone balance at addresses
@@ -219,7 +203,7 @@ describe('staking', function () {
       const balanceSoneTokenBefore = await _soneToken.balanceOf(_soneToken.address)
       const balanceSoneAliceBefore = await _soneToken.balanceOf(alice.address)
       // withdraw all lp tokens
-      await _soneMasterFarmer.withdraw(0, 999000, { from: alice.address })
+      await _soneMasterFarmer.connect(alice).withdraw(0, 999000)
       // get sone balance at addresses
       const balanceDevAfter = await _soneToken.balanceOf(dev.address)
       const balanceSoneTokenAfter = await _soneToken.balanceOf(_soneToken.address)
@@ -244,7 +228,7 @@ describe('staking', function () {
     })
     // check withdraw amount larger than amount alice provides
     it('invalid amount', async () => {
-      await expect(_soneMasterFarmer.withdraw(0, 1000000, { from: alice.address })).to.be.revertedWith(
+      await expect(_soneMasterFarmer.connect(alice).withdraw(0, 1000000)).to.be.revertedWith(
         revertMsg.INVALID_AMOUNT_WITHDRAW
       )
     })
@@ -252,29 +236,25 @@ describe('staking', function () {
   describe('#update pool', async () => {
     beforeEach(async () => {
       // add new lp token to pool
-      await _soneMasterFarmer.add(10, _pair.address, true, {
-        from: owner.address,
-      })
+      await _soneMasterFarmer.connect(owner).add(10, _pair.address, true)
       // Approve allowance to spend alice's tokens for the _router
-      await _token0.approve(_router.address, 10000000, { from: alice.address })
-      await _token1.approve(_router.address, 10000000, { from: alice.address })
+      await _token0.connect(alice).approve(_router.address, 10000000)
+      await _token1.connect(alice).approve(_router.address, 10000000)
       // add liquidity
-      await _router.addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987, {
-        from: alice.address,
-      })
+      await _router
+        .connect(alice)
+        .addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987)
       // Approve allowance to spend alice's lp token for the _soneMasterFarmer
-      await _pair.approve(_soneMasterFarmer.address, 10000000, {
-        from: alice.address,
-      })
+      await _pair.connect(alice).approve(_soneMasterFarmer.address, 10000000)
       // alice deposits lp tokens
-      await _soneMasterFarmer.deposit(0, 999000, { from: alice.address })
+      await _soneMasterFarmer.connect(alice).deposit(0, 999000)
     })
     it('success', async () => {
       // get balance sone token of addresses
       const balanceDevBefore = await _soneToken.balanceOf(dev.address)
       const balanceSoneTokenBefore = await _soneToken.balanceOf(_soneToken.address)
       const balanceSoneAliceBefore = await _soneToken.balanceOf(alice.address)
-      await _soneMasterFarmer.updatePool(0, { from: alice.address })
+      await _soneMasterFarmer.connect(alice).updatePool(0)
       // get balance sone token after update pool
       const balanceDevAfter = await _soneToken.balanceOf(dev.address)
       const balanceSoneTokenAfter = await _soneToken.balanceOf(_soneToken.address)
@@ -320,17 +300,11 @@ describe('staking', function () {
       const pairAddress = await _factory.getPair(_token0.address, _token2.address)
       _pair1 = UniswapV2Pair__factory.connect(pairAddress, owner)
       // add 2 lp tokens to pool
-      await _soneMasterFarmer.add(10, _pair.address, true, {
-        from: owner.address,
-      })
-      await _soneMasterFarmer.add(10, _pair1.address, true, {
-        from: owner.address,
-      })
+      await _soneMasterFarmer.connect(owner).add(10, _pair.address, true)
+      await _soneMasterFarmer.connect(owner).add(10, _pair1.address, true)
     })
     it('success', async () => {
-      const result = await _soneMasterFarmer.getPoolReward(1, 30, 10, {
-        from: alice.address,
-      })
+      const result = await _soneMasterFarmer.connect(alice).getPoolReward(1, 30, 10)
       // check pool reward for farmer with totalAllocPoint = 20
       assert.equal(result[1].valueOf(), 2320) // ((30-1)*32*10)/20
       // check pool reward for dev
@@ -340,35 +314,27 @@ describe('staking', function () {
   describe('#get Pending Reward', async () => {
     beforeEach(async () => {
       // Approve allowance to spend alice's tokens for the _router
-      await _token0.approve(_router.address, 10000000, { from: alice.address })
-      await _token1.approve(_router.address, 10000000, { from: alice.address })
+      await _token0.connect(alice).approve(_router.address, 10000000)
+      await _token1.connect(alice).approve(_router.address, 10000000)
       // add liquidity
-      await _router.addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987, {
-        from: alice.address,
-      })
+      await _router
+        .connect(alice)
+        .addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987)
       // add new lp token to pool
-      await _soneMasterFarmer.add(10, _pair.address, true, {
-        from: owner.address,
-      })
+      await _soneMasterFarmer.connect(owner).add(10, _pair.address, true)
       // Approve allowance to spend alice's lp token for the _soneMasterFarmer
-      await _pair.approve(_soneMasterFarmer.address, 10000000, {
-        from: alice.address,
-      })
+      await _pair.connect(alice).approve(_soneMasterFarmer.address, 10000000)
       // alice deposits lp tokens to pool
-      await _soneMasterFarmer.deposit(0, 999000, { from: alice.address })
+      await _soneMasterFarmer.connect(alice).deposit(0, 999000)
     })
     it('no pending', async () => {
-      const result = await _soneMasterFarmer.pendingReward(0, alice.address, {
-        from: alice.address,
-      })
+      const result = await _soneMasterFarmer.connect(alice).pendingReward(0, alice.address)
       assert.equal(result.valueOf(), 0) // no new block
     })
     it('exits pending', async () => {
       // update lastRewardBlock and accSonePerShare
-      await _soneMasterFarmer.updatePool(0, { from: alice.address })
-      const result = await _soneMasterFarmer.pendingReward(0, alice.address, {
-        from: alice.address,
-      })
+      await _soneMasterFarmer.connect(alice).updatePool(0)
+      const result = await _soneMasterFarmer.connect(alice).pendingReward(0, alice.address)
       // check amount pending reward
       assert.equal(result.valueOf(), 159, 'alice pending reward equal to 159') // has 1 new block
     })
@@ -376,22 +342,18 @@ describe('staking', function () {
   describe('#claim reward', async () => {
     beforeEach(async () => {
       // add new lp token to pool
-      await _soneMasterFarmer.add(10, _pair.address, true, {
-        from: owner.address,
-      })
+      await _soneMasterFarmer.connect(owner).add(10, _pair.address, true)
       // Approve allowance to spend alice's tokens for the _router
-      await _token0.approve(_router.address, 10000000, { from: alice.address })
-      await _token1.approve(_router.address, 10000000, { from: alice.address })
+      await _token0.connect(alice).approve(_router.address, 10000000)
+      await _token1.connect(alice).approve(_router.address, 10000000)
       // add liquidity
-      await _router.addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987, {
-        from: alice.address,
-      })
+      await _router
+        .connect(alice)
+        .addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987)
       // Approve allowance to spend alice's lp token for the _soneMasterFarmer
-      await _pair.approve(_soneMasterFarmer.address, 10000000, {
-        from: alice.address,
-      })
+      await _pair.connect(alice).approve(_soneMasterFarmer.address, 10000000)
       // alice deposits lp token to pool
-      await _soneMasterFarmer.deposit(0, 999000, { from: alice.address })
+      await _soneMasterFarmer.connect(alice).deposit(0, 999000)
     })
     it('success', async () => {
       // get sone token balance for addresses
@@ -399,7 +361,7 @@ describe('staking', function () {
       const balanceSoneTokenBefore = await _soneToken.balanceOf(_soneToken.address)
       const balanceSoneAliceBefore = await _soneToken.balanceOf(alice.address)
       // alice claim reward for staking
-      await _soneMasterFarmer.claimReward(0, { from: alice.address })
+      await _soneMasterFarmer.connect(alice).claimReward(0)
       // get sone token balance for addresses after claimed
       const balanceDevAfter = await _soneToken.balanceOf(dev.address)
       const balanceSoneTokenAfter = await _soneToken.balanceOf(_soneToken.address)
@@ -424,26 +386,22 @@ describe('staking', function () {
   describe('#emergency Withdraw', async () => {
     beforeEach(async () => {
       // add new pair to pool
-      await _soneMasterFarmer.add(10, _pair.address, true, {
-        from: owner.address,
-      })
+      await _soneMasterFarmer.connect(owner).add(10, _pair.address, true)
       // Approve allowance to spend alice's tokens for the _router
-      await _token0.approve(_router.address, 10000000, { from: alice.address })
-      await _token1.approve(_router.address, 10000000, { from: alice.address })
+      await _token0.connect(alice).approve(_router.address, 10000000)
+      await _token1.connect(alice).approve(_router.address, 10000000)
       // add liquidity
-      await _router.addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987, {
-        from: alice.address,
-      })
+      await _router
+        .connect(alice)
+        .addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987)
       // Approve allowance to spend alice's lp token for the _soneMasterFarmer
-      await _pair.approve(_soneMasterFarmer.address, 10000000, {
-        from: alice.address,
-      })
+      await _pair.connect(alice).approve(_soneMasterFarmer.address, 10000000)
       // deposit lp token to pool
-      await _soneMasterFarmer.deposit(0, 999000, { from: alice.address })
+      await _soneMasterFarmer.connect(alice).deposit(0, 999000)
     })
     it('success', async () => {
       // withdraw without rewards
-      await _soneMasterFarmer.emergencyWithdraw(0, { from: alice.address })
+      await _soneMasterFarmer.connect(alice).emergencyWithdraw(0)
       // check num lp token in pool and alice lp token balance
       assert.equal(
         (await _pair.balanceOf(_soneMasterFarmer.address)).toNumber(),
@@ -462,36 +420,28 @@ describe('staking', function () {
   describe('#set dev', async () => {
     it('success', async () => {
       // update dev address by previous dev address
-      await _soneMasterFarmer.dev(alice.address, { from: dev.address })
+      await _soneMasterFarmer.connect(dev).dev(alice.address)
       // check current dev address
       assert.equal(await _soneMasterFarmer.devaddr(), alice.address)
     })
     // check set dev address not by current dev address
     it('not dev address', async () => {
-      await expect(_soneMasterFarmer.dev(alice.address, { from: alice.address })).to.be.revertedWith(
-        revertMsg.NOT_DEV_ADDRESS
-      )
+      await expect(_soneMasterFarmer.connect(alice).dev(alice.address)).to.be.revertedWith(revertMsg.NOT_DEV_ADDRESS)
     })
   })
   describe('#getNewRewardPerBlock', async () => {
     beforeEach(async () => {
       // add new pair to pool
-      await _soneMasterFarmer.add(10, _pair.address, true, {
-        from: owner.address,
-      })
+      await _soneMasterFarmer.connect(owner).add(10, _pair.address, true)
     })
     // check reward for pool 0
     it('pid1 = 0', async () => {
-      const result = await _soneMasterFarmer.getNewRewardPerBlock(0, {
-        from: alice.address,
-      })
+      const result = await _soneMasterFarmer.connect(alice).getNewRewardPerBlock(0)
       assert.equal(result.valueOf(), 160) // 32 * 5
     })
     // check reward for pool 1
     it('pid1 = 1', async () => {
-      const result = await _soneMasterFarmer.getNewRewardPerBlock(1, {
-        from: alice.address,
-      })
+      const result = await _soneMasterFarmer.connect(alice).getNewRewardPerBlock(1)
       assert.equal(result.valueOf(), 160) // 32 * 5 * 10 (allocPoint) / 10 (totalAllocPoint)
     })
   })

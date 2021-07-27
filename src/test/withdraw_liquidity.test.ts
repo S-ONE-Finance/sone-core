@@ -44,6 +44,7 @@ describe('SoneSwapRouter - Withdraw Liquidity', () => {
       _weth.address,
     ])) as SoneSwapRouter
     _soneToken = (await deployContract(owner, await artifacts.readArtifact('SoneToken'))) as SoneToken
+    await _soneToken.connect(owner).__SoneToken_init(1, 1000)
     _soneConvert = (await deployContract(owner, await artifacts.readArtifact('SoneConvert'), [
       _soneToken.address,
       _weth.address,
@@ -60,37 +61,32 @@ describe('SoneSwapRouter - Withdraw Liquidity', () => {
       'TOKEN1',
       50000000,
     ])) as MockERC20
-    console.log(111)
     await _factory.setSoneConvert(_soneConvert.address)
-    console.log(222)
 
     // Get pool address of the pair token0-token1
-    await _factory['createPair(address,address)'](_token0.address, _token1.address)
-    // console.log(333)
+    await _factory.createPair(_token0.address, _token1.address)
 
     const pairAddress = await _factory.getPair(_token0.address, _token1.address)
-    console.log(pairAddress);
-    
-    // _pair = UniswapV2Pair__factory.connect(pairAddress, owner)
-    // const blkNumber = await ethers.provider.getBlockNumber()
-    // await _soneToken.setAllowTransferOn(blkNumber + 1)
-    // // Transfer tokens to alice address
-    // await _token0.connect(owner).transfer(alice.address, 10000000)
-    // await _token1.connect(owner).transfer(alice.address, 10000000)
+    _pair = UniswapV2Pair__factory.connect(pairAddress, owner)
 
-    // // Approve allowance to spend alice's tokens for the router
-    // await _token0.connect(alice).approve(_router.address, 1000000)
-    // await _token1.connect(alice).approve(_router.address, 1000000)
+    const blkNumber = await ethers.provider.getBlockNumber()
+    await _soneToken.setAllowTransferOn(blkNumber + 1)
+    // Transfer tokens to alice address
+    await _token0.transfer(alice.address, 10000000)
+    await _token1.transfer(alice.address, 10000000)
+    // Approve allowance to spend alice's tokens for the router
+    await _token0.connect(alice).approve(_router.address, 1000000)
+    await _token1.connect(alice).approve(_router.address, 1000000)
   })
 
   describe('# withdraw liquidity in a pool excluding ETH', async () => {
-    // beforeEach(async () => {
-    //   // add liquidity to new pool
-    //   await _router
-    //     .connect(alice)
-    //     .addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987)
-    // })
-    it.only('burn without fee', async () => {
+    beforeEach(async () => {
+      // add liquidity to new pool
+      const add = await _router
+        .connect(alice)
+        .addLiquidity(_token0.address, _token1.address, 1000000, 1000000, 0, 0, alice.address, 11571287987)
+    })
+    it('burn without fee', async () => {
       // Approve allowance to spend alice's lp token for the router
       await _pair.connect(alice).approve(_router.address, 1000000 - MINIMUM_LIQUIDITY)
 
@@ -171,9 +167,7 @@ describe('SoneSwapRouter - Withdraw Liquidity', () => {
 
     it('revert: burn with token amount min over the token reserve', async () => {
       // Approve allowance to spend alice's lp token for the router
-      await _pair.approve(_router.address, 1000000 - MINIMUM_LIQUIDITY, {
-        from: alice.address,
-      })
+      await _pair.connect(alice).approve(_router.address, 1000000 - MINIMUM_LIQUIDITY)
       // check failed condition
       await expect(
         _router
@@ -346,11 +340,6 @@ describe('SoneSwapRouter - Withdraw Liquidity', () => {
           .connect(alice)
           .swapExactTokensForTokens(1000, 0, [_token0.address, _token1.address], alice.address, 11571287987)
       }
-      console.log('pair total supply :>> ', (await _pair.totalSupply()).toNumber())
-      console.log('pair reserves[0] :>> ', (await _pair.getReserves())[0].toNumber())
-      console.log('pair reserves[1] :>> ', (await _pair.getReserves())[1].toNumber())
-
-      console.log(`bob's LP token :>> `, (await _pair.balanceOf(bob.address)).toNumber())
       // Remove liquidity
       await _pair.connect(bob).approve(_router.address, 1000000)
       await _router

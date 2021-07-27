@@ -32,7 +32,7 @@ describe('staking', () => {
   let _soneToken: SoneToken
 
   beforeEach(async () => {
-    [owner, alice, dev] = await ethers.getSigners()
+    ;[owner, alice, dev] = await ethers.getSigners()
     // Initialize contract instances
     _factory = (await deployContract(owner, await artifacts.readArtifact('UniswapV2Factory'), [
       owner.address,
@@ -56,7 +56,7 @@ describe('staking', () => {
     const pairAddress = await _factory.getPair(_token0.address, _token1.address)
     _pair = UniswapV2Pair__factory.connect(pairAddress, owner)
     _soneToken = (await deployContract(owner, await artifacts.readArtifact('SoneToken'))) as SoneToken
-    
+    await _soneToken.connect(owner).__SoneToken_init(1, 1000)
     _soneMasterFarmer = (await deployContract(owner, await artifacts.readArtifact('SoneMasterFarmer'), [
       _soneToken.address,
       dev.address,
