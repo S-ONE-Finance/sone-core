@@ -2,7 +2,6 @@ import { task, types } from 'hardhat/config'
 import { Pair, TokenAmount, Token, ChainId } from '@s-one-finance/sdk-core'
 
 import { accountToSigner, tokenNameToAddress } from 'src/tasks/utils'
-import soneSwap from 'src/deployments/sone-swap.json'
 
 import {
   SoneSwapRouter,
@@ -10,8 +9,12 @@ import {
   UniswapV2Factory,
   UniswapV2Pair__factory,
   TetherToken__factory,
+  UniswapV2ERC20__factory,
 } from 'src/types'
 import { BigNumber } from 'ethers'
+
+import { ganache } from 'src/deployments/sone-swap.json'
+const soneSwap = ganache
 
 task('router:add-liquidity', 'Router add liquidity')
   .addParam('selectedToken', `Token A address: 'usdt', 'usdc', 'dai' or another token address`)
@@ -56,18 +59,32 @@ task('router:add-liquidity', 'Router add liquidity')
       console.log('theOtherTokenAddress :>> ', theOtherTokenAddress)
       console.log('selectedTokenDesired :>> ', selectedTokenDesired)
       console.log('theOtherTokenDesired :>> ', theOtherTokenDesired)
-      await (
-        await router.addLiquidity(
-          selectedTokenAddress,
-          theOtherTokenAddress,
-          selectedTokenDesired,
-          theOtherTokenDesired,
-          selectedTokenMinimum,
-          theOtherTokenMinimum,
-          toSigner.address,
-          BigNumber.from(deadline)
-        )
-      ).wait()
+
+      console.log(
+        'selected balance :>> ',
+        (
+          await UniswapV2ERC20__factory.connect(selectedTokenAddress, senderSigner).balanceOf(senderSigner.address)
+        ).toString()
+      )
+      console.log(
+        'selected balance :>> ',
+        (
+          await UniswapV2ERC20__factory.connect(theOtherTokenAddress, senderSigner).balanceOf(senderSigner.address)
+        ).toString()
+      )
+      console.log('log :>> ', await router.factory())
+      // await (
+      await router.addLiquidity(
+        selectedTokenAddress,
+        theOtherTokenAddress,
+        selectedTokenDesired,
+        theOtherTokenDesired,
+        selectedTokenMinimum,
+        theOtherTokenMinimum,
+        toSigner.address,
+        BigNumber.from(deadline)
+      )
+      // ).wait()
     }
   )
 

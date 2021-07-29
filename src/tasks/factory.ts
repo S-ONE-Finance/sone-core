@@ -1,22 +1,44 @@
 import { task, types } from 'hardhat/config'
 
 import { accountToSigner, tokenNameToAddress } from 'src/tasks/utils'
-import soneSwap from 'src/deployments/sone-swap.json'
 
 import { UniswapV2Factory__factory, UniswapV2Pair__factory } from 'src/types'
-import { ethers, Signer } from 'ethers'
 
-const MAX_INT = ethers.constants.MaxInt256
+import { ganache } from 'src/deployments/sone-swap.json'
+const soneSwap = ganache
 
-task('factory:get-pair', 'Get pair info')
-  .addParam('pairAddress', 'Pair address')
-  .setAction(async ({ pairAddress }, hre) => {
+task('factory:create-pair', 'Get pair info')
+  .addParam('token0', 'Token 0 address')
+  .addParam('token1', 'Token 1 address')
+  .addOptionalParam('pairAddress', 'Pair address')
+  .setAction(async ({ token0, token1 }, hre) => {
     const [signer] = await accountToSigner(hre, 'owner')
+    const factory = UniswapV2Factory__factory.connect(soneSwap.Factory as string, signer)
+
+    const [token0Address, token1Address] = tokenNameToAddress(token0, token1)
+    await (await factory.createPair(token0Address, token1Address)).wait()
+
+    const pairAddress = await factory.getPair(token0Address, token1Address)
     const pair = UniswapV2Pair__factory.connect(pairAddress, signer)
 
-    const token0 = await pair.token0()
-    const token1 = await pair.token1()
+    console.log('pair :>> ', pair.address)
+    console.log('token0 :>> ', await pair.token0())
+    console.log('token1 :>> ', await pair.token1())
+  })
 
-    console.log('token0 :>> ', token0)
-    console.log('token1 :>> ', token1)
+task('factory:get-pair', 'Get pair info')
+  .addParam('token0', 'Token 0 address')
+  .addParam('token1', 'Token 1 address')
+  .addOptionalParam('pairAddress', 'Pair address')
+  .setAction(async ({ token0, token1 }, hre) => {
+    const [signer] = await accountToSigner(hre, 'owner')
+    const factory = UniswapV2Factory__factory.connect(soneSwap.Factory, signer)
+
+    const [token0Address, token1Address] = tokenNameToAddress(token0, token1)
+    const pairAddress = await factory.getPair(token0Address, token1Address)
+    const pair = UniswapV2Pair__factory.connect(pairAddress, signer)
+
+    console.log('pair :>> ', pair.address)
+    console.log('token0 :>> ', await pair.token0())
+    console.log('token1 :>> ', await pair.token1())
   })

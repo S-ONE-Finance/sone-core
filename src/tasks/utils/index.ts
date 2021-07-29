@@ -2,9 +2,9 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { BigNumber } from 'ethers'
 import { HardhatRuntimeEnvironment } from 'hardhat/types'
 
-import erc20 from 'src/abi/ERC-20.json'
-import tokens from 'src/deployments/erc-20-tokens.json'
-import { ERC20, TetherToken } from 'src/types'
+import { ERC20 } from 'src/types'
+import { contractData } from 'src/deployments/data'
+import { ContractData, Contracts, TokenInfo, SoneInfo } from '~/deployments/data/contract-info.interface'
 
 export const getDecimalizedBalance = async (contract: ERC20, decimal: number, address: string): Promise<string> => {
   const balance = await contract.balanceOf(address)
@@ -45,20 +45,29 @@ export const accountToSigner = async (
   return addresses
 }
 
-export const tokenNameToAddress = (...names: string[]): string[] => {
+export const getContracts = (network: string): Contracts => {
+  return Object.getOwnPropertyDescriptor(contractData, network)?.value
+}
+
+export const tokenNameToAddress = (hre: HardhatRuntimeEnvironment, ...tokenNames: string[]): string[] => {
   let addresses: string[] = []
-  console.log('Get contract address of token names :>> ', names)
-  for (const name of names) {
-    if (name.search('usdt') != -1) {
-      addresses.push(tokens.USDT)
-    } else if (name.search('usdc') != -1) {
-      addresses.push(tokens.USDC)
-    } else if (name.search('dai') != -1) {
-      addresses.push(tokens.DAI)
-    } else {
-      addresses.push(name)
-    }
+  console.log('Get contract address of token names :>> ', tokenNames)
+
+  const tokens: TokenInfo[] = getCommonTokens(hre.network.name)
+  for (const name of tokenNames) {
+    const address = tokens.find((token) => token.symbol.toLowerCase() == name.toLowerCase())?.address
+    addresses.push(address || name)
   }
   console.log('addresses :>> ', addresses)
   return addresses
+}
+
+export const getCommonTokens = (network: string): TokenInfo[] => {
+  const contracts: Contracts = getContracts(network)
+  return contracts.tokens || []
+}
+
+export const getSoneContracts = (network: string): SoneInfo | null => {
+  const contracts: Contracts = getContracts(network)
+  return contracts.sone || null
 }

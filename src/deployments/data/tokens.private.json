@@ -1,0 +1,26 @@
+[
+  {
+    "address": "0x6d6A34f2Be1E76902A2fDe049f317610cdF453EB",
+    "decimals": 6,
+    "name": "TetherToken",
+    "symbol": "USDT"
+  },
+  {
+    "address": "0x292bB4986f3fcb10D800D155fD7e880940e36718",
+    "decimals": 6,
+    "name": "USD Coin",
+    "symbol": "USDC"
+  },
+  {
+    "address": "0xdD125E047736566790A024549Ba3fD5511a0a889",
+    "decimals": 18,
+    "name": "DAI",
+    "symbol": "DAI"
+  },
+  {
+    "address": "0xA3f121Af7Bfc0353b149ee7bA83327D988cEA282",
+    "decimals": 18,
+    "name": "Wrapped Ether",
+    "symbol": "WETH"
+  }
+]

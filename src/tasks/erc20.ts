@@ -2,7 +2,6 @@ import { BigNumber } from 'ethers'
 import { task, types } from 'hardhat/config'
 
 import erc20 from 'src/abi/ERC-20.json'
-import tokens from 'src/deployments/erc-20-tokens.json'
 import { ERC20, TetherToken, UniswapV2ERC20__factory } from 'src/types'
 
 import { accountToSigner, getDecimalizedBalance, tokenNameToAddress, decimalize } from 'src/tasks/utils'
@@ -12,8 +11,8 @@ task('erc20:token-balance', 'Get token balance of an account')
   .addParam('tokenDecimals', `The token decimals`)
   .addParam('account', `The account's address`)
   .setAction(async (taskArgs, hre) => {
-    const signer = (await accountToSigner(hre, taskArgs.account))?.[0]
-    const tokenAddress = tokenNameToAddress(taskArgs.tokenAddress)?.[0]
+    const [signer] = await accountToSigner(hre, taskArgs.account)
+    const [tokenAddress] = tokenNameToAddress(hre, taskArgs.tokenAddress)
 
     const contract = new hre.ethers.Contract(tokenAddress, erc20.abi, signer) as ERC20
 
@@ -45,7 +44,7 @@ task('erc20:transfer-token', `Transfer a token from an account 'from' to another
   .setAction(async (taskArgs, hre) => {
     console.log(taskArgs)
     const [from, to] = await accountToSigner(hre, taskArgs.from, taskArgs.to)
-    const [tokenAddress] = tokenNameToAddress(taskArgs.tokenAddress)
+    const [tokenAddress] = tokenNameToAddress(hre, taskArgs.tokenAddress)
 
     const contract = new hre.ethers.Contract(tokenAddress, erc20.abi, from) as TetherToken
     console.log(`Calling token '${contract.address}' to tranfer from '${from.address}' to '${to.address}'`)
