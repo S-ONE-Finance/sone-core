@@ -1,33 +1,52 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// When running the script with `npx hardhat run <script>` you'll find the Hardhat
-// Runtime Environment's members available in the global scope.
-// const hre = require("hardhat");
+import { ethers, upgrades, network } from 'hardhat'
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
+import { resolve } from 'path'
 
-import { BigNumber } from 'ethers'
-import { run, ethers } from 'hardhat'
-import { multiplize } from 'src/tasks/utils'
+import { TokenInfo } from 'src/tasks/interface/contract-info.interface'
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  await run('compile')
+  const DEPLOYMENT_PATH = resolve('src/deployments')
+  const DATA_PATH = resolve(DEPLOYMENT_PATH, 'data')
+  const TOKEN_PATH = resolve(DATA_PATH, `tokens.${network.name}.json`)
 
-  // const accounts = await ethers.get
+  if (!existsSync(DATA_PATH)) {
+    mkdirSync(DATA_PATH)
+  }
+
+  let tokenList: TokenInfo[] = existsSync(TOKEN_PATH) ? JSON.parse(readFileSync(TOKEN_PATH).toString()) : []
+
   // We get the contract to deploy
-  var decimalPlaces = 18
+  const SONE = await ethers.getContractFactory('SoneToken')
+  const sone = await upgrades.deployProxy(SONE, [1, 1000], {
+    initializer: '__SoneToken_init',
+  })
 
-  const SONE = await ethers.getContractFactory('FaucetToken')
-  decimalPlaces = 18
-  // const sone = await SONE.deploy(BigInt(amount), 'DAI', decimalPlaces, 'DAI')
+  // SONE-v2 contracts
+  // const SONEv2 = await ethers.getContractFactory('SoneTokenv2')
+  // const soneV2 = await upgrades.upgradeProxy(sone.address, SONEv2)
 
-  // await sone.deployed()
+  console.log('SONE deployed to:', sone.address)
 
-  // console.log('SONE deployed to:', sone.address)
+  let isExistedSone = false
+  tokenList = tokenList.map((value) => {
+    if (value.symbol == 'SONE') {
+      value.address = sone.address
+      isExistedSone = true
+    }
+    return value
+  })
+
+  if (!isExistedSone) {
+    tokenList.push({
+      address: sone.address,
+      decimals: await sone.decimals(),
+      name: await sone.name(),
+      symbol: await sone.symbol(),
+    })
+  }
+
+  writeFileSync(TOKEN_PATH, JSON.stringify(tokenList, null, 2))
+  console.log(`Wrote data to file ${TOKEN_PATH}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

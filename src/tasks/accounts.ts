@@ -2,7 +2,6 @@ import { task } from 'hardhat/config'
 import { ERC20 } from 'src/types'
 
 import { accountToSigner, tokenNameToAddress, getDecimalizedBalance } from 'src/tasks/utils'
-import erc20 from 'src/abi/ERC-20.json'
 import { BigNumber } from 'ethers'
 
 task('account:list', 'Prints the list of accounts', async (_taskArgs, hre) => {

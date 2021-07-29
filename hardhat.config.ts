@@ -1,7 +1,8 @@
+import '@typechain/hardhat'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
-import '@typechain/hardhat'
 import { HardhatUserConfig } from 'hardhat/config'
+import '@openzeppelin/hardhat-upgrades'
 import dotenv from 'dotenv'
 import 'tsconfig-paths/register' // This adds support for typescript paths mappings
 
@@ -29,6 +30,16 @@ const config: HardhatUserConfig = {
         '0xcadbe0586fb7b800b1d94d5b5ca5c7765419adbad1f5a21c94f36023112b3e85',
         '0x9811566962d584d506458555d88616c7c3e8e0365332bd6a543f9c37209efa19',
       ],
+      gasPrice: 'auto',
+    },
+    ganache: {
+      url: `https://ganache.s-one.finance`,
+      accounts: [
+        '0x4b07975545d12e8c92baa5bde272e3504c37944f1385858e1cc8be62d97dec05',
+        '0xcadbe0586fb7b800b1d94d5b5ca5c7765419adbad1f5a21c94f36023112b3e85',
+        '0x9811566962d584d506458555d88616c7c3e8e0365332bd6a543f9c37209efa19',
+      ],
+      gasPrice: 'auto',
     },
     mainnet: {
       url: `https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
