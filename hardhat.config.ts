@@ -1,7 +1,8 @@
+import '@typechain/hardhat'
 import '@nomiclabs/hardhat-ethers'
 import '@nomiclabs/hardhat-waffle'
-import '@typechain/hardhat'
 import { HardhatUserConfig } from 'hardhat/config'
+import '@openzeppelin/hardhat-upgrades'
 import dotenv from 'dotenv'
 import 'tsconfig-paths/register' // This adds support for typescript paths mappings
 

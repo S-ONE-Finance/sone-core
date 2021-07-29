@@ -11,7 +11,7 @@ import { multiplize } from 'src/tasks/utils'
 import { writeFileSync, existsSync, mkdirSync } from 'fs'
 import { resolve } from 'path'
 
-import { ContractData, Contracts, TokenInfo } from '~/deployments/data/contract-info.interface'
+import { TokenInfo } from '~/tasks/interface/contract-info.interface'
 
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
@@ -25,17 +25,15 @@ async function main() {
   const DATA_PATH = resolve(DEPLOYMENT_PATH, 'data')
   const TOKEN_PATH = resolve(DATA_PATH, `tokens.${network.name}.json`)
 
-  let data: ContractData
-
   if (!existsSync(DATA_PATH)) {
     mkdirSync(DATA_PATH)
   }
 
+  const tokenList: TokenInfo[] = []
+
   // We get the contract to deploy
   const FaucetToken = await ethers.getContractFactory('FaucetToken')
   const WETH9 = await ethers.getContractFactory('WETH9')
-
-  const tokenList: TokenInfo[] = []
 
   // Tokens with 6 decimal places
   var decimalPlaces = 6
@@ -49,11 +47,6 @@ async function main() {
   amount = multiplize(decimalPlaces, BigNumber.from(5000000000))
   const dai = await FaucetToken.deploy(BigInt(amount), 'DAI', decimalPlaces, 'DAI')
   const weth = await WETH9.deploy()
-
-  await usdt.deployed()
-  await usdc.deployed()
-  await dai.deployed()
-  await weth.deployed()
 
   console.log('USDT deployed to:', usdt.address)
   console.log('USDC deployed to:', usdc.address)

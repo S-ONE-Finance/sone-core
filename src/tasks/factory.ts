@@ -1,11 +1,8 @@
 import { task, types } from 'hardhat/config'
 
-import { accountToSigner, tokenNameToAddress } from 'src/tasks/utils'
+import { accountToSigner, getSoneContracts, tokenNameToAddress } from 'src/tasks/utils'
 
 import { UniswapV2Factory__factory, UniswapV2Pair__factory } from 'src/types'
-
-import { ganache } from 'src/deployments/sone-swap.json'
-const soneSwap = ganache
 
 task('factory:create-pair', 'Get pair info')
   .addParam('token0', 'Token 0 address')
@@ -13,7 +10,8 @@ task('factory:create-pair', 'Get pair info')
   .addOptionalParam('pairAddress', 'Pair address')
   .setAction(async ({ token0, token1 }, hre) => {
     const [signer] = await accountToSigner(hre, 'owner')
-    const factory = UniswapV2Factory__factory.connect(soneSwap.Factory as string, signer)
+    const soneContracts = getSoneContracts(hre.network.name)
+    const factory = UniswapV2Factory__factory.connect(soneContracts?.factory as string, signer)
 
     const [token0Address, token1Address] = tokenNameToAddress(token0, token1)
     await (await factory.createPair(token0Address, token1Address)).wait()
@@ -32,7 +30,8 @@ task('factory:get-pair', 'Get pair info')
   .addOptionalParam('pairAddress', 'Pair address')
   .setAction(async ({ token0, token1 }, hre) => {
     const [signer] = await accountToSigner(hre, 'owner')
-    const factory = UniswapV2Factory__factory.connect(soneSwap.Factory, signer)
+    const soneContracts = getSoneContracts(hre.network.name)
+    const factory = UniswapV2Factory__factory.connect(soneContracts?.factory as string, signer)
 
     const [token0Address, token1Address] = tokenNameToAddress(token0, token1)
     const pairAddress = await factory.getPair(token0Address, token1Address)

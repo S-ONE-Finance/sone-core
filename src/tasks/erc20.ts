@@ -4,7 +4,14 @@ import { task, types } from 'hardhat/config'
 import erc20 from 'src/abi/ERC-20.json'
 import { ERC20, TetherToken, UniswapV2ERC20__factory } from 'src/types'
 
-import { accountToSigner, getDecimalizedBalance, tokenNameToAddress, decimalize } from 'src/tasks/utils'
+import {
+  accountToSigner,
+  getDecimalizedBalance,
+  tokenNameToAddress,
+  decimalize,
+  getCommonTokens,
+  getSoneContracts,
+} from 'src/tasks/utils'
 
 task('erc20:token-balance', 'Get token balance of an account')
   .addParam('tokenAddress', `The token address`)
@@ -63,3 +70,11 @@ task('erc20:transfer-token', `Transfer a token from an account 'from' to another
     const aliceBalance = await getDecimalizedBalance(contract as unknown as ERC20, taskArgs.tokenDecimals, to.address)
     console.log('receiver balance :>> ', aliceBalance, 'tokens')
   })
+
+task('erc20:get-common-tokens', 'Get common tokens such as: usdt, usdc, dai, sone, ect.').setAction(async ({}, hre) => {
+  console.log('tokens :>> ', getCommonTokens(hre.network.name))
+})
+
+task('erc20:get-sone-contracts', 'Get sone contracts: factory, router, masterFarmer').setAction(async ({}, hre) => {
+  console.log('sone contracts :>> ', getSoneContracts(hre.network.name))
+})

@@ -3,8 +3,8 @@ import { BigNumber } from 'ethers'
 import { HardhatRuntimeEnvironment } from 'hardhat/types'
 
 import { ERC20 } from 'src/types'
-import { contractData } from 'src/deployments/data'
-import { ContractData, Contracts, TokenInfo, SoneInfo } from '~/deployments/data/contract-info.interface'
+import { contractData } from './data'
+import { ContractData, Contracts, TokenInfo, SoneContracts } from '../interface/contract-info.interface'
 
 export const getDecimalizedBalance = async (contract: ERC20, decimal: number, address: string): Promise<string> => {
   const balance = await contract.balanceOf(address)
@@ -67,7 +67,7 @@ export const getCommonTokens = (network: string): TokenInfo[] => {
   return contracts.tokens || []
 }
 
-export const getSoneContracts = (network: string): SoneInfo | null => {
+export const getSoneContracts = (network: string): SoneContracts | null => {
   const contracts: Contracts = getContracts(network)
   return contracts.sone || null
 }

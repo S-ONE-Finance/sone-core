@@ -1,7 +1,7 @@
 import { task, types } from 'hardhat/config'
 import { Pair, TokenAmount, Token, ChainId } from '@s-one-finance/sdk-core'
 
-import { accountToSigner, tokenNameToAddress } from 'src/tasks/utils'
+import { accountToSigner, getSoneContracts, tokenNameToAddress } from 'src/tasks/utils'
 
 import {
   SoneSwapRouter,
@@ -12,9 +12,6 @@ import {
   UniswapV2ERC20__factory,
 } from 'src/types'
 import { BigNumber } from 'ethers'
-
-import { ganache } from 'src/deployments/sone-swap.json'
-const soneSwap = ganache
 
 task('router:add-liquidity', 'Router add liquidity')
   .addParam('selectedToken', `Token A address: 'usdt', 'usdc', 'dai' or another token address`)
@@ -42,7 +39,8 @@ task('router:add-liquidity', 'Router add liquidity')
       const [senderSigner, toSigner] = await accountToSigner(hre, 'owner', to)
       const [selectedTokenAddress, theOtherTokenAddress] = tokenNameToAddress(selectedToken, theOtherToken)
 
-      const router = SoneSwapRouter__factory.connect(soneSwap.Router, senderSigner)
+      const soneContracts = getSoneContracts(hre.network.name)
+      const router = SoneSwapRouter__factory.connect(soneContracts?.router as string, senderSigner)
 
       await hre.run('erc20:approve', {
         token: selectedTokenAddress,
@@ -96,7 +94,8 @@ task('router:add-liquidity-eth', 'Router add liquidity eth')
   .addParam('to', 'To')
   .addOptionalParam('deadline', 'transaction deadline', Number.MAX_SAFE_INTEGER.toString(), types.string)
   .setAction(async ({ token, tokenDesired, tokenMinimum, ethMinimum, to, deadline }, hre) => {
-    const router = await hre.ethers.getContractAt('UniswapV2Router', soneSwap.Router)
+    const soneContracts = getSoneContracts(hre.network.name)
+    const router = await hre.ethers.getContractAt('UniswapV2Router', soneContracts?.router as string)
     await hre.run('erc20:approve', { token, spender: router.address })
     await (
       await router
@@ -113,8 +112,12 @@ task('router:swap', 'Router swap')
   .addOptionalParam('deadline', 'transaction deadline', Number.MAX_SAFE_INTEGER.toString(), types.string)
   .setAction(async ({ selectedToken, theOtherToken, inputAmount }, hre) => {
     const [signer] = await accountToSigner(hre, 'owner')
-    const factory = (await hre.ethers.getContractAt('UniswapV2Factory', soneSwap.Factory)) as UniswapV2Factory
-    const router = (await hre.ethers.getContractAt('SoneSwapRouter', soneSwap.Router)) as SoneSwapRouter
+    const soneContracts = getSoneContracts(hre.network.name)
+    const factory = (await hre.ethers.getContractAt(
+      'UniswapV2Factory',
+      soneContracts?.factory as string
+    )) as UniswapV2Factory
+    const router = (await hre.ethers.getContractAt('SoneSwapRouter', soneContracts?.router as string)) as SoneSwapRouter
     const [selectedTokenAddress, theOtherTokenAddress] = tokenNameToAddress(selectedToken, theOtherToken)
 
     const pairAddress = await factory.getPair(selectedTokenAddress, theOtherTokenAddress)

@@ -5,14 +5,15 @@ export interface TokenInfo {
   decimals: number
 }
 
-export interface SoneInfo {
-  soneSwap: string
-  soneMasterFarmer: string
+export interface SoneContracts {
+  factory: string
+  router: string
+  masterFarmer: string
 }
 
 export interface Contracts {
   tokens?: TokenInfo[]
-  sone?: SoneInfo
+  sone?: SoneContracts
 }
 
 export interface ContractData {
