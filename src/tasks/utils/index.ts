@@ -4,7 +4,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types'
 
 import { ERC20 } from 'src/types'
 import { contractData } from './data'
-import { ContractData, Contracts, TokenInfo, SoneContracts } from '../interface/contract-info.interface'
+import { Contracts, TokenInfo, SoneContracts } from '../interface/contract-info.interface'
 
 export const getDecimalizedBalance = async (contract: ERC20, decimal: number, address: string): Promise<string> => {
   const balance = await contract.balanceOf(address)

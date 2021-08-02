@@ -37,7 +37,7 @@ task('router:add-liquidity', 'Router add liquidity')
       hre
     ) => {
       const [senderSigner, toSigner] = await accountToSigner(hre, 'owner', to)
-      const [selectedTokenAddress, theOtherTokenAddress] = tokenNameToAddress(selectedToken, theOtherToken)
+      const [selectedTokenAddress, theOtherTokenAddress] = tokenNameToAddress(hre, selectedToken, theOtherToken)
 
       const soneContracts = getSoneContracts(hre.network.name)
       const router = SoneSwapRouter__factory.connect(soneContracts?.router as string, senderSigner)
@@ -70,19 +70,23 @@ task('router:add-liquidity', 'Router add liquidity')
           await UniswapV2ERC20__factory.connect(theOtherTokenAddress, senderSigner).balanceOf(senderSigner.address)
         ).toString()
       )
-      console.log('log :>> ', await router.factory())
-      // await (
-      await router.addLiquidity(
-        selectedTokenAddress,
-        theOtherTokenAddress,
-        selectedTokenDesired,
-        theOtherTokenDesired,
-        selectedTokenMinimum,
-        theOtherTokenMinimum,
-        toSigner.address,
-        BigNumber.from(deadline)
-      )
-      // ).wait()
+      console.log('selectedTokenMinimum :>> ', selectedTokenMinimum);
+      console.log('theOtherTokenMinimum :>> ', theOtherTokenMinimum);
+      console.log('toSigner.address :>> ', toSigner.address);
+      console.log('deadline :>> ', deadline)
+
+      await (
+        await router.addLiquidity(
+          selectedTokenAddress,
+          theOtherTokenAddress,
+          selectedTokenDesired,
+          theOtherTokenDesired,
+          selectedTokenMinimum,
+          theOtherTokenMinimum,
+          toSigner.address,
+          deadline
+        )
+      ).wait()
     }
   )
 
@@ -118,7 +122,7 @@ task('router:swap', 'Router swap')
       soneContracts?.factory as string
     )) as UniswapV2Factory
     const router = (await hre.ethers.getContractAt('SoneSwapRouter', soneContracts?.router as string)) as SoneSwapRouter
-    const [selectedTokenAddress, theOtherTokenAddress] = tokenNameToAddress(selectedToken, theOtherToken)
+    const [selectedTokenAddress, theOtherTokenAddress] = tokenNameToAddress(hre, selectedToken, theOtherToken)
 
     const pairAddress = await factory.getPair(selectedTokenAddress, theOtherTokenAddress)
     const _pair = UniswapV2Pair__factory.connect(pairAddress, signer)
