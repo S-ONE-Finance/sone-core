@@ -13,7 +13,7 @@ task('factory:create-pair', 'Get pair info')
     const soneContracts = getSoneContracts(hre.network.name)
     const factory = UniswapV2Factory__factory.connect(soneContracts?.factory as string, signer)
 
-    const [token0Address, token1Address] = tokenNameToAddress(token0, token1)
+    const [token0Address, token1Address] = tokenNameToAddress(hre, token0, token1)
     await (await factory.createPair(token0Address, token1Address)).wait()
 
     const pairAddress = await factory.getPair(token0Address, token1Address)
@@ -33,11 +33,11 @@ task('factory:get-pair', 'Get pair info')
     const soneContracts = getSoneContracts(hre.network.name)
     const factory = UniswapV2Factory__factory.connect(soneContracts?.factory as string, signer)
 
-    const [token0Address, token1Address] = tokenNameToAddress(token0, token1)
+    const [token0Address, token1Address] = tokenNameToAddress(hre, token0, token1)
     const pairAddress = await factory.getPair(token0Address, token1Address)
     const pair = UniswapV2Pair__factory.connect(pairAddress, signer)
 
     console.log('pair :>> ', pair.address)
-    console.log('token0 :>> ', await pair.token0())
-    console.log('token1 :>> ', await pair.token1())
+    console.log(`${token0} reserve :>> `, (await pair.getReserves())?.[0].toString())
+    console.log(`${token1} reserve :>> `, (await pair.getReserves())?.[1].toString())
   })

@@ -34,7 +34,7 @@ task('erc20:approve', 'ERC20 approve')
   .addOptionalParam('amount', 'Approval amount', Number.MAX_SAFE_INTEGER.toString(), types.string)
   .setAction(async ({ from, token, spender, amount }, hre) => {
     const [fromSigner, spenderSigner] = await accountToSigner(hre, from, spender)
-    const [tokenAddress] = tokenNameToAddress(token)
+    const [tokenAddress] = tokenNameToAddress(hre, token)
     const tokenContract = UniswapV2ERC20__factory.connect(tokenAddress, fromSigner)
     await (
       await tokenContract.approve(spenderSigner.address, BigNumber.from(amount), {
