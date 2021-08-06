@@ -2,6 +2,7 @@ import BN from 'bn.js'
 import { ethers, waffle, artifacts } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import { assert } from 'chai'
+import { Pair } from '@s-one-finance/sdk-core'
 import { WETH9, UniswapV2Factory, SoneSwapRouter, MockERC20, UniswapV2Pair, UniswapV2Pair__factory } from '~/types'
 
 const _BN = (str: string | number) => new BN(str)
@@ -18,6 +19,7 @@ function getAmountIn(amountOut: BN, reserveIn: BN, reserveOut: BN, swapFee: BN) 
   var denominator = reserveOut.sub(amountOut).mul(_BN(1000).sub(swapFee))
   return numerator.div(denominator).add(_BN(1))
 }
+
 describe('swap', () => {
   let [owner, alice, bob]: SignerWithAddress[] = []
   let _weth: WETH9

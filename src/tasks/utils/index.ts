@@ -23,7 +23,7 @@ export const accountToSigner = async (
   hre: HardhatRuntimeEnvironment,
   ...names: string[]
 ): Promise<SignerWithAddress[]> => {
-  console.log('Get address of accounts :>> ', names)
+  console.log('Get address of accounts', names)
   const accounts = await hre.ethers.getSigners()
 
   let addresses: SignerWithAddress[] = []
@@ -39,7 +39,7 @@ export const accountToSigner = async (
     }
   }
   console.log(
-    'addresses :>> ',
+    '-> account addresses :>> ',
     addresses.map((value) => value.address)
   )
   return addresses
@@ -51,14 +51,14 @@ export const getContracts = (network: string): Contracts => {
 
 export const tokenNameToAddress = (hre: HardhatRuntimeEnvironment, ...tokenNames: string[]): string[] => {
   let addresses: string[] = []
-  console.log('Get contract address of token names :>> ', tokenNames)
+  console.log('Get contract address of token names', tokenNames)
 
   const tokens: TokenInfo[] = getCommonTokens(hre.network.name)
   for (const name of tokenNames) {
     const address = tokens.find((token) => token.symbol.toLowerCase() == name.toLowerCase())?.address
     addresses.push(address || name)
   }
-  console.log('addresses :>> ', addresses)
+  console.log('-> token addresses :>> ', addresses)
   return addresses
 }
 

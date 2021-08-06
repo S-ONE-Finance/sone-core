@@ -2,7 +2,7 @@ import { BigNumber } from 'ethers'
 import { task, types } from 'hardhat/config'
 
 import erc20 from 'src/abi/ERC-20.json'
-import { ERC20, TetherToken, UniswapV2ERC20__factory } from 'src/types'
+import { ERC20, TetherToken, UniswapV2ERC20__factory, WETH9__factory, WETH9 } from 'src/types'
 
 import {
   accountToSigner,
@@ -12,6 +12,7 @@ import {
   getCommonTokens,
   getSoneContracts,
 } from 'src/tasks/utils'
+import { string } from 'hardhat/internal/core/params/argumentTypes'
 
 task('erc20:token-balance', 'Get token balance of an account')
   .addParam('tokenAddress', `The token address`)
@@ -69,6 +70,23 @@ task('erc20:transfer-token', `Transfer a token from an account 'from' to another
     )
     const aliceBalance = await getDecimalizedBalance(contract as unknown as ERC20, taskArgs.tokenDecimals, to.address)
     console.log('receiver balance :>> ', aliceBalance, 'tokens')
+  })
+
+task('erc20:convert-eth-to-weth', 'Convert ETH to WETH')
+  .addOptionalParam('account', `The account that provides ETH to deposit`, 'owner')
+  .addOptionalParam('amount', 'ETH amount', '99999999999999999999999')
+  .setAction(async ({ account, amount }, hre) => {
+    const [signer] = await accountToSigner(hre, account)
+    const [wethAddress] = tokenNameToAddress(hre, 'weth')
+    const soneContracts = getSoneContracts(hre.network.name)
+    let weth: WETH9 = WETH9__factory.connect(wethAddress, signer)
+    ;(
+      await weth.deposit({
+        value: amount,
+      })
+    ).wait()
+
+    console.log('WETH balance :>> ', (await weth.balanceOf(signer.address)).toString())
   })
 
 task('erc20:get-common-tokens', 'Get common tokens such as: usdt, usdc, dai, sone, ect.').setAction(async ({}, hre) => {

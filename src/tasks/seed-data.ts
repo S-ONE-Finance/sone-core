@@ -56,4 +56,8 @@ task('seed:token-balance', 'Transfer usdt, usdc, dai to alice and bob', async (_
     tokenAddress: 'dai',
     tokenDecimals: '18',
   })
+  // Deposit WETH
+  await hre.run('erc20:convert-eth-to-weth', {
+    amount: '50000000000000000000'
+  })
 })

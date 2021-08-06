@@ -1,30 +1,30 @@
 [
   {
-    "address": "0x635BCc6A77d9B42B0483f2dED34b9f1A97A221Df",
+    "address": "0x516de3a7a567d81737e3a46ec4ff9cfd1fcb0136",
     "decimals": 6,
     "name": "TetherToken",
     "symbol": "USDT"
   },
   {
-    "address": "0x78bA67047aB65c73d699B6eE54620E6c46f97840",
+    "address": "0x0d9c8723b343a8368bebe0b5e89273ff8d712e3c",
     "decimals": 6,
     "name": "USD Coin",
     "symbol": "USDC"
   },
   {
-    "address": "0xF0e4024f29Fd73F2c1757b7d9CbA93de76100feF",
+    "address": "0xc2118d4d90b274016cb7a54c03ef52e6c537d957",
     "decimals": 18,
     "name": "DAI",
     "symbol": "DAI"
   },
   {
-    "address": "0x5B62636C6d2b79fE47B131F0afee4a71aDf9723B",
+    "address": "0xc778417e063141139fce010982780140aa0cd5ab",
     "decimals": 18,
     "name": "Wrapped Ether",
     "symbol": "WETH"
   },
   {
-    "address": "0x337006106E7Dacd7D84b91F9BCB6cB1182837870",
+    "address": "0x57bb30bdb0d449bf687ed648acf2467f045c8e74",
     "decimals": 18,
     "name": "SONE Token",
     "symbol": "SONE"
