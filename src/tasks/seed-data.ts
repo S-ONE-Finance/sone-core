@@ -1,10 +1,9 @@
 import { task } from 'hardhat/config'
 
-import { accountToSigner, tokenNameToAddress, getDecimalizedBalance } from 'src/tasks/utils'
 import 'src/tasks/accounts'
 import 'src/tasks/erc20'
 
-task('seed:ethers-balance', 'Transfer ETH to alice and bob', async (_taskArgs, hre) => {
+task('seed:ethers-balance', 'Transfer ETH to alice and bob', async ({}, hre) => {
   await hre.run('account:transfer', {
     from: 'owner',
     to: 'alice',
@@ -17,7 +16,7 @@ task('seed:ethers-balance', 'Transfer ETH to alice and bob', async (_taskArgs, h
   })
 })
 
-task('seed:token-balance', 'Transfer usdt, usdc, dai to alice and bob', async (_taskArgs, hre) => {
+task('seed:token-balance', 'Transfer usdt, usdc, dai to alice and bob', async ({}, hre) => {
   // Alice
   await hre.run('erc20:transfer-token', {
     from: 'owner',
@@ -36,6 +35,10 @@ task('seed:token-balance', 'Transfer usdt, usdc, dai to alice and bob', async (_
     to: 'alice',
     tokenAddress: 'dai',
     tokenDecimals: '18',
+  })
+  await hre.run('sonetoken:mint', {
+    to: 'alice',
+    amount: '10000000000000000000', // 1e19
   })
   // Bob
   await hre.run('erc20:transfer-token', {
@@ -58,6 +61,12 @@ task('seed:token-balance', 'Transfer usdt, usdc, dai to alice and bob', async (_
   })
   // Deposit WETH
   await hre.run('erc20:convert-eth-to-weth', {
-    amount: '50000000000000000000'
+    amount: '50000000000000000000',
+  })
+
+  // Owner
+  await hre.run('sonetoken:mint', {
+    to: 'owner',
+    amount: '10000000000000000000', // 1e19
   })
 })

@@ -15,8 +15,8 @@ import {
 } from 'src/types'
 
 task('router:add-liquidity', 'Router add liquidity')
-  .addParam('selectedToken', `Token A address: 'usdt', 'usdc', 'dai' or another token address`)
-  .addParam('theOtherToken', `Token B address: 'usdt', 'usdc', 'dai' or another token address`)
+  .addParam('selectedToken', `Token A address: 'usdt', 'usdc', 'dai', 'sone' or another token address`)
+  .addParam('theOtherToken', `Token B address: 'usdt', 'usdc', 'dai', 'sone' or another token address`)
   .addParam('selectedTokenDesired', 'Token A Desired')
   .addParam('theOtherTokenDesired', 'Token B Desired')
   .addParam('selectedTokenMinimum', 'Token A Minimum')

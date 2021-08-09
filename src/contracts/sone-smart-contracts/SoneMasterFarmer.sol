@@ -87,6 +87,13 @@ contract SoneMasterFarmer is Ownable {
 	// Total allocation points. Must be the sum of all allocation points in all pools.
 	uint256 public totalAllocPoint = 0;
 
+	event Add(uint256 allocPoint, address lpToken, bool withUpdate);
+	event Set(uint256 indexed pid, uint256 allocPoint, bool withUpdate);
+	event SetMigrator(address migrator);
+	event Migrate(uint256 indexed pid);
+	event UpdatePool(uint256 indexed pid);
+	event Dev(address devaddr);
+
 	event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
 	event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
 	event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
@@ -129,6 +136,7 @@ contract SoneMasterFarmer is Ownable {
 		totalAllocPoint = totalAllocPoint.add(_allocPoint);
 		poolId1[address(_lpToken)] = poolInfo.length + 1;
 		poolInfo.push(PoolInfo({lpToken: _lpToken, allocPoint: _allocPoint, lastRewardBlock: lastRewardBlock, accSonePerShare: 0}));
+		emit Add(_allocPoint, address(_lpToken), _withUpdate);
 	}
 
 	// Update the given pool's SONE allocation point. Can only be called by the owner.
@@ -142,11 +150,13 @@ contract SoneMasterFarmer is Ownable {
 		}
 		totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
 		poolInfo[_pid].allocPoint = _allocPoint;
+		emit Set(_pid, _allocPoint, _withUpdate);
 	}
 
 	// Set the migrator contract. Can only be called by the owner.
 	function setMigrator(IMigratorToSoneSwap _migrator) public onlyOwner {
 		migrator = _migrator;
+		emit SetMigrator(address(_migrator));
 	}
 
 	// Migrate lp token to another lp contract. Can be called by anyone. We trust that migrator contract is good.
@@ -159,6 +169,7 @@ contract SoneMasterFarmer is Ownable {
 		IERC20 newLpToken = migrator.migrate(lpToken);
 		require(bal == newLpToken.balanceOf(address(this)), "migrate: bad");
 		pool.lpToken = newLpToken;
+		emit Migrate(_pid);
 	}
 
 	// Update reward variables for all pools. Be careful of gas spending!
@@ -194,6 +205,7 @@ contract SoneMasterFarmer is Ownable {
 		sone.mint(address(this), soneForFarmer);
 		pool.accSonePerShare = pool.accSonePerShare.add(soneForFarmer.mul(1e12).div(lpSupply));
 		pool.lastRewardBlock = block.number;
+		emit UpdatePool(_pid);
 	}
 
 	// |--------------------------------------|
@@ -271,6 +283,7 @@ contract SoneMasterFarmer is Ownable {
 		if (user.amount > 0) {
 			uint256 pending = user.amount.mul(pool.accSonePerShare).div(1e12).sub(user.rewardDebt);
 			uint256 masterBal = sone.balanceOf(address(this));
+			uint256 lockAmount = 0;
 
 			if (pending > masterBal) {
 				pending = masterBal;
@@ -278,18 +291,16 @@ contract SoneMasterFarmer is Ownable {
 
 			if (pending > 0) {
 				sone.transfer(msg.sender, pending);
-				uint256 lockAmount = 0;
 				if (user.rewardDebtAtBlock <= FINISH_BONUS_AT_BLOCK) {
 					lockAmount = pending.mul(PERCENT_LOCK_BONUS_REWARD).div(100);
 					sone.lock(msg.sender, lockAmount);
 				}
 
 				user.rewardDebtAtBlock = block.number;
-
-				emit SendSoneReward(msg.sender, _pid, pending, lockAmount);
 			}
 
 			user.rewardDebt = user.amount.mul(pool.accSonePerShare).div(1e12);
+			emit SendSoneReward(msg.sender, _pid, pending, lockAmount);
 		}
 	}
 
@@ -351,6 +362,7 @@ contract SoneMasterFarmer is Ownable {
 	function dev(address _devaddr) public {
 		require(msg.sender == devaddr, "dev: wut?");
 		devaddr = _devaddr;
+		emit Dev(_devaddr);
 	}
 
 	function getNewRewardPerBlock(uint256 pid1) public view returns (uint256) {
