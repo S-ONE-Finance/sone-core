@@ -28,12 +28,16 @@ export const accountToSigner = async (
 
   let addresses: SignerWithAddress[] = []
   for (var name of names) {
-    if (name.search('owner') != -1) {
+    if (name === 'owner') {
       addresses.push(accounts[0])
-    } else if (name.search('alice') != -1) {
+    } else if (name === 'alice') {
       addresses.push(accounts[1])
-    } else if (name.search('bob') != -1) {
+    } else if (name === 'bob') {
       addresses.push(accounts[2])
+    } else if (name === 'alice2') {
+      addresses.push(accounts[3])
+    } else if (name === 'bob2') {
+      addresses.push(accounts[4])
     } else {
       addresses.push(await hre.ethers.getSigner(name))
     }

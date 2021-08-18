@@ -1,9 +1,5 @@
-# ETH -> WETH
-yarn task:ropsten erc20:convert-eth-to-weth \
---amount 500000000000000000
-
 # DAI-WETH
-yarn task:ropsten router:add-liquidity \
+yarn task:ganache router:add-liquidity \
 --selected-token dai \
 --the-other-token weth \
 --selected-token-desired 250000000000000000000 \
@@ -13,7 +9,7 @@ yarn task:ropsten router:add-liquidity \
 --to owner
 
 # USDC-WETH
-yarn task:ropsten router:add-liquidity \
+yarn task:ganache router:add-liquidity \
 --selected-token usdc \
 --the-other-token weth \
 --selected-token-desired 250000000 \
@@ -23,7 +19,7 @@ yarn task:ropsten router:add-liquidity \
 --to owner
 
 # USDT-WETH
-yarn task:ropsten router:add-liquidity \
+yarn task:ganache router:add-liquidity \
 --selected-token usdt \
 --the-other-token weth \
 --selected-token-desired 250100000 \
@@ -32,12 +28,22 @@ yarn task:ropsten router:add-liquidity \
 --the-other-token-minimum 0 \
 --to owner
 
-# SONE-USDT
-yarn task:ropsten router:add-liquidity \
+# SONE-WETH
+yarn task:ganache router:add-liquidity \
 --selected-token sone \
---the-other-token usdt \
---selected-token-desired 1000000000000000000 \
+--the-other-token weth \
+--selected-token-desired 5000000000000000000000 \
 --selected-token-minimum 0 \
 --the-other-token-desired 1000000000000000000 \
+--the-other-token-minimum 0 \
+--to owner
+
+# SONE-USDT
+yarn task:ganache router:add-liquidity \
+--selected-token sone \
+--the-other-token usdt \
+--selected-token-desired 2000000000000000000 \
+--selected-token-minimum 0 \
+--the-other-token-desired 1000000 \
 --the-other-token-minimum 0 \
 --to owner

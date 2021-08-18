@@ -1,18 +1,18 @@
 [
   {
-    "address": "0x393397Baae01Dc19678220E4D3Fd34FDA4FeBd1D",
+    "address": "0xb676317A4045CF9C338Be8B837B983C23d8a6810",
     "decimals": 6,
     "name": "TetherToken",
     "symbol": "USDT"
   },
   {
-    "address": "0xF1732C0B75558A6be7658860a34A0077C440bE90",
+    "address": "0x667DD964A735175c6E492CdD2a2A8B58A2333ECe",
     "decimals": 6,
     "name": "USD Coin",
     "symbol": "USDC"
   },
   {
-    "address": "0x266d839248f3A920c77D45c4361F707627A907D9",
+    "address": "0x05775a51A8343a417B8FB4d347daB16A8ed2C27E",
     "decimals": 18,
     "name": "DAI",
     "symbol": "DAI"

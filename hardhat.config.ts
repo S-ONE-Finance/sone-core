@@ -50,13 +50,17 @@ const config: HardhatUserConfig = {
     },
     ropsten: {
       url: `https://ropsten.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-      accounts: ['4c54f0453dc294005ba7c38944e84074c9e69399d06f8f60109de627fc678fdd'],
+      accounts: {
+        mnemonic: 'income orchard else soldier spot dog eight business bulb obey swear budget'
+      },
       gasPrice: Number.parseInt(process.env.GAS_PRICE as string),
       gas: Number.parseInt(process.env.GAS_LIMIT as string),
     },
     rinkeby: {
       url: `https://rinkeby.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
-      accounts: ['4c54f0453dc294005ba7c38944e84074c9e69399d06f8f60109de627fc678fdd'],
+      accounts: {
+        mnemonic: 'income orchard else soldier spot dog eight business bulb obey swear budget'
+      },
     },
     goerli: {
       url: `https://goerli.infura.io/v3/${process.env.INFURA_PROJECT_ID}`,
@@ -78,7 +82,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 1000,
+            runs: 200,
           },
         },
       },
@@ -87,7 +91,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 1000,
+            runs: 200,
           },
         },
       },

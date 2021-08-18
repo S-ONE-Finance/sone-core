@@ -12,7 +12,6 @@ import {
   getCommonTokens,
   getSoneContracts,
 } from 'src/tasks/utils'
-import { string } from 'hardhat/internal/core/params/argumentTypes'
 
 task('erc20:token-balance', 'Get token balance of an account')
   .addParam('tokenAddress', `The token address`)
@@ -78,7 +77,6 @@ task('erc20:convert-eth-to-weth', 'Convert ETH to WETH')
   .setAction(async ({ account, amount }, hre) => {
     const [signer] = await accountToSigner(hre, account)
     const [wethAddress] = tokenNameToAddress(hre, 'weth')
-    const soneContracts = getSoneContracts(hre.network.name)
     let weth: WETH9 = WETH9__factory.connect(wethAddress, signer)
     ;(
       await weth.deposit({
@@ -91,8 +89,4 @@ task('erc20:convert-eth-to-weth', 'Convert ETH to WETH')
 
 task('erc20:get-common-tokens', 'Get common tokens such as: usdt, usdc, dai, sone, ect.').setAction(async ({}, hre) => {
   console.log('tokens :>> ', getCommonTokens(hre.network.name))
-})
-
-task('erc20:get-sone-contracts', 'Get sone contracts: factory, router, masterFarmer').setAction(async ({}, hre) => {
-  console.log('sone contracts :>> ', getSoneContracts(hre.network.name))
 })
