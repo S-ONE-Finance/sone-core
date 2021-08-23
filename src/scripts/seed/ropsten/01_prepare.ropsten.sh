@@ -1,5 +1,5 @@
 # ETH -> WETH
-yarn task:ropsten erc20:convert-eth-to-weth --amount 1500000000000000000
+yarn task:ropsten erc20:convert-eth-to-weth --amount 5000000000000000000
 
 # Mint SONE
 yarn task:ropsten sonetoken:mint --address-token sone --amount 3000000000000000000000000 --to owner

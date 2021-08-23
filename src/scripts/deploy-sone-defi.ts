@@ -19,11 +19,11 @@ async function main() {
 
   // Params
   const [wethAddress, soneAddress] = tokenNameToAddress(hre, 'weth', 'sone')
-  const feeSetter = process.env.FEE_SETTER_ADDRESS as string
-  const devAddresses = process.env.PRIVATE_OPERATOR_ADDRESS as string
+  const feeSetter = process.env.FEE_SETTER_ADDRESS || process.env.PRIVATE_FEE_SETTER_ADDRESS as string
+  const devAddresses = process.env.OPERATOR_ADDRESS || process.env.PRIVATE_OPERATOR_ADDRESS as string
   const rewardPerBlock = 5 // reward per block
-  const startBlock = 10 // Blocker number 13546394 (on mainnet) ~ 2021-11-1 00:00 +08 timezone
-  const halvingAfterBlock = 100 // Number block for a week ~ 13.4s / block
+  const startBlock = 10890583 // Blocker number 13546394 (on mainnet) ~ 2021-11-1 00:00 +08 timezone
+  const halvingAfterBlock = 45134 // Number block for a week ~ 13.4s / block
 
   // We get the contract to deploy
   const Factory = await ethers.getContractFactory('UniswapV2Factory')

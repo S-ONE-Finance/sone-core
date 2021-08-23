@@ -37,7 +37,13 @@ task('factory:get-pair', 'Get pair info')
     const pairAddress = await factory.getPair(token0Address, token1Address)
     const pair = UniswapV2Pair__factory.connect(pairAddress, signer)
 
-    console.log('pair :>> ', pair.address)
-    console.log(`${(await pair.token0()) == token0 ? token0 : token1} reserve :>> `, (await pair.getReserves())?.[0].toString())
-    console.log(`${(await pair.token0()) == token1 ? token1 : token0} reserve :>> `, (await pair.getReserves())?.[1].toString())
+    console.log('pair :>> ', pair.address.toLowerCase())
+    console.log(
+      `${(await pair.token0()) == token0Address ? `token0 ` + token0 : `token1 ` + token1} reserve :>> `,
+      (await pair.getReserves())?.[0].toString()
+    )
+    console.log(
+      `${(await pair.token0()) == token0Address ? `token1 ` + token1 : `token0 ` + token0} reserve :>> `,
+      (await pair.getReserves())?.[1].toString()
+    )
   })

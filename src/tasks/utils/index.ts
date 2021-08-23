@@ -16,7 +16,7 @@ export const decimalize = (decimal: number, value: BigNumber): string => {
 }
 
 export const multiplize = (decimal: number, value: BigNumber): string => {
-  return value.mul(BigNumber.from('10').pow(decimal)).toString()
+  return BigNumber.from(value).mul(BigNumber.from('10').pow(decimal)).toString()
 }
 
 export const accountToSigner = async (
@@ -51,6 +51,19 @@ export const accountToSigner = async (
 
 export const getContracts = (network: string): Contracts => {
   return Object.getOwnPropertyDescriptor(contractData, network)?.value
+}
+
+export const tokenNameToToken = (hre: HardhatRuntimeEnvironment, ...tokenNames: string[]): TokenInfo[] => {
+  let tokens: TokenInfo[] = []
+  console.log('Get contract of token names', tokenNames)
+
+  const commonTokens: TokenInfo[] = getCommonTokens(hre.network.name)
+  for (const name of tokenNames) {
+    const token: TokenInfo | undefined = commonTokens.find((token) => token.symbol.toLowerCase() == name.toLowerCase())
+    token && tokens.push(token)
+  }
+  console.log('-> tokens :>> ', tokens)
+  return tokens
 }
 
 export const tokenNameToAddress = (hre: HardhatRuntimeEnvironment, ...tokenNames: string[]): string[] => {
