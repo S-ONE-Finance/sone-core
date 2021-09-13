@@ -19,7 +19,8 @@
     "task:help": "hardhat --help",
     "task:private": "hardhat --network private",
     "task:ganache": "hardhat --network ganache",
-    "task:ropsten": "hardhat --network ropsten"
+    "task:ropsten": "hardhat --network ropsten",
+    "task:rinkeby": "hardhat --network rinkeby"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",

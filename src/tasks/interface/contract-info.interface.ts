@@ -20,4 +20,5 @@ export interface ContractData {
   private?: Contracts
   ganache?: Contracts
   ropsten?: Contracts
+  rinkeby?: Contracts
 }

@@ -18,10 +18,12 @@ function getSoneContracts(path: string): SoneContracts {
 var privateTokens: TokenInfo[] = getTokens(format(TOKEN_PATH, 'private'))
 var ganacheTokens: TokenInfo[] = getTokens(format(TOKEN_PATH, 'ganache'))
 var ropstenTokens: TokenInfo[] = getTokens(format(TOKEN_PATH, 'ropsten'))
+var rinkebyTokens: TokenInfo[] = getTokens(format(TOKEN_PATH, 'rinkeby'))
 
 var privateSone: SoneContracts = getSoneContracts(format(SONE_PATH, 'private'))
 var ganacheSone: SoneContracts = getSoneContracts(format(SONE_PATH, 'ganache'))
 var ropstenSone: SoneContracts = getSoneContracts(format(SONE_PATH, 'ropsten'))
+var rinkebySone: SoneContracts = getSoneContracts(format(SONE_PATH, 'rinkeby'))
 
 export const contractData: ContractData = {
   private: {
@@ -35,5 +37,9 @@ export const contractData: ContractData = {
   ropsten: {
     tokens: ropstenTokens,
     sone: ropstenSone,
+  },
+  rinkeby: {
+    tokens: rinkebyTokens,
+    sone: rinkebySone,
   },
 }
