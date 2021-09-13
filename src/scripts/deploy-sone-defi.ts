@@ -3,10 +3,12 @@ import * as hre from 'hardhat'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { resolve } from 'path'
 
-import { tokenNameToAddress } from '~/tasks/utils'
+import { tokenNameToAddress, accountToSigner } from '~/tasks/utils'
 import { SoneContracts } from '~/tasks/interface/contract-info.interface'
+import { SoneToken, SoneToken__factory } from '~/types'
 
 async function main() {
+  let [owner] = await accountToSigner(hre, 'owner')
   const DEPLOYMENT_PATH = resolve('src/deployments')
   const DATA_PATH = resolve(DEPLOYMENT_PATH, 'data')
   const SONE_PATH = resolve(DATA_PATH, `sone-defi.${network.name}.json`)
@@ -21,6 +23,7 @@ async function main() {
   const [wethAddress, soneAddress] = tokenNameToAddress(hre, 'weth', 'sone')
   const feeSetter = process.env.FEE_SETTER_ADDRESS || (process.env.PRIVATE_FEE_SETTER_ADDRESS as string)
   const devAddresses = process.env.OPERATOR_ADDRESS || (process.env.PRIVATE_OPERATOR_ADDRESS as string)
+  const feeTo = process.env.FEE_TO_ADDRESS || process.env.FEE_SETTER_ADDRESS as string
   const rewardPerBlock = '5000000000000000000' // reward per block
   const startBlock = 10890583 // Blocker number 13546394 (on mainnet) ~ 2021-11-1 00:00 +08 timezone
   const halvingAfterBlock = 45134 // Number block for a week ~ 13.4s / block
@@ -29,6 +32,7 @@ async function main() {
   const Factory = await ethers.getContractFactory('UniswapV2Factory')
   const Router = await ethers.getContractFactory('SoneSwapRouter')
   const MasterFarmeruter = await ethers.getContractFactory('SoneMasterFarmer')
+  const SoneConvert = await ethers.getContractFactory('SoneConvert')
 
   const factory = await Factory.deploy(feeSetter)
   const router = await Router.deploy(factory.address, wethAddress)
@@ -39,6 +43,17 @@ async function main() {
     startBlock,
     halvingAfterBlock
   )
+  let _sone: SoneToken = SoneToken__factory.connect(soneAddress, owner)
+
+  const soneConvert = await SoneConvert.deploy(soneAddress, wethAddress, factory.address, router.address)
+
+  // factory set address
+  await (await factory.setFeeTo(feeTo)).wait()
+  await (await factory.setWithdrawFeeTo(feeTo)).wait()
+  await (await factory.setSoneConvert(soneConvert.address)).wait()
+  // transfer ownership sone to masterFarmer
+  await (await _sone.transferOwnership(masterFarmeruter.address)).wait()
+
 
   console.log('Factory deployed to:', factory.address)
   console.log('Router deployed to:', router.address)
