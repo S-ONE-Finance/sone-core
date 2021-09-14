@@ -17,6 +17,11 @@ contract SoneConvert {
 	ISoneSwapRouter public soneSwapRouter;
 	bytes4 private constant SELECTOR = bytes4(keccak256(bytes("transfer(address,uint256)")));
 
+	modifier routerSender() {
+		require(address(soneSwapRouter) == msg.sender, "routerSender: caller is soneswap router");
+		_;
+	}
+
 	constructor(
 		address _sone,
 		address _weth,
@@ -35,7 +40,7 @@ contract SoneConvert {
 		uint256 liquidity,
 		uint256 totalSupply,
 		address to
-	) external {
+	) external routerSender{
 		// get pair
 		IUniswapV2Pair pair = IUniswapV2Pair(factory.getPair(token0, token1));
 		require(pair != IUniswapV2Pair(address(0)), "PAIR NOT FOUND");
