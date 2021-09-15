@@ -48,6 +48,7 @@ async function main() {
   const soneConvert = await SoneConvert.deploy(soneAddress, wethAddress, factory.address, router.address)
 
   // factory set address
+  // TODO: khi run script, chú ý thêm account feeSetter vào hardhat config, để connect với factory setFeeTo setWithdrawFeeTo setSoneConvert
   await (await factory.setFeeTo(feeTo)).wait()
   await (await factory.setWithdrawFeeTo(feeTo)).wait()
   await (await factory.setSoneConvert(soneConvert.address)).wait()
