@@ -14,7 +14,7 @@ dotenv.config()
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
   // Your type-safe config goes here
-  defaultNetwork: 'private',
+  defaultNetwork: 'hardhat',
   networks: {
     hardhat: {
       allowUnlimitedContractSize: false,
@@ -108,6 +108,9 @@ const config: HardhatUserConfig = {
     cache: '../cache',
     artifacts: '../artifacts',
   },
+  mocha: {
+    timeout: 200000
+  }
 }
 
 export default config

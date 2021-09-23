@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity =0.6.12;
 
-// import "hardhat/console.sol";
-
 import "./uniswapv2/UniswapV2Router02.sol";
 import "./interfaces/ISoneConvert.sol";
 
