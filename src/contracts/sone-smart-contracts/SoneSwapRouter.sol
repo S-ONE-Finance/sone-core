@@ -14,6 +14,7 @@ contract SoneSwapRouter is UniswapV2Router02 {
 		address to,
 		uint256 deadline
 	) external ensure(deadline) returns (uint256[] memory amounts) {
+		require(msg.sender == IUniswapV2Factory(factory).soneConvert(), 'Caller is not SoneConvert.');
 		amounts = UniswapV2Library.getAmountsOut(factory, amountIn, path, 0);
 		if (amounts[1] == 0) return new uint256[](2);
 		(address token0, address token1) = UniswapV2Library.sortTokens(path[0], path[1]);
