@@ -14,10 +14,12 @@ async function main() {
   }
 
   let tokenList: TokenInfo[] = existsSync(TOKEN_PATH) ? JSON.parse(readFileSync(TOKEN_PATH).toString()) : []
+  const lockFromBlock = 13723975 // Blocker number 13723975 (on mainnet) ~ 2021-12-1 00:00 +08 timezone
+  const lockToBlock = 16093061 // Blocker number 16093061 (on mainnet) ~ 2022-12-1 00:00 +08 timezone
 
   // We get the contract to deploy
   const SONE = await ethers.getContractFactory('SoneToken')
-  const sone = await upgrades.deployProxy(SONE, [1, 1000], {
+  const sone = await upgrades.deployProxy(SONE, [lockFromBlock, lockToBlock], {
     initializer: '__SoneToken_init',
   })
 
