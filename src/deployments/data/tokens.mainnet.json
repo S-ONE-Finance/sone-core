@@ -1,0 +1,14 @@
+[
+  {
+    "address": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    "decimals": 18,
+    "name": "Wrapped Ether",
+    "symbol": "WETH"
+  },
+  {
+    "address": "0xf5c771e0b749444eAec5C1F7EF5c0B93200BB0E4",
+    "decimals": 18,
+    "name": "SONE Token",
+    "symbol": "SONE"
+  }
+]

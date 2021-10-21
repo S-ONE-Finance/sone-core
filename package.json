@@ -1,7 +1,7 @@
 {
   "name": "@s-one-finance/core",
   "description": "🛠 Smart Contract for S-ONE Finance Swap.",
-  "version": "2.0.0-rc1",
+  "version": "2.0.0",
   "main": "index.js",
   "files": [
     "artifacts",
@@ -20,7 +20,8 @@
     "task:private": "hardhat --network private",
     "task:ganache": "hardhat --network ganache",
     "task:ropsten": "hardhat --network ropsten",
-    "task:rinkeby": "hardhat --network rinkeby"
+    "task:rinkeby": "hardhat --network rinkeby",
+    "task:mainnet": "hardhat --network mainnet"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",

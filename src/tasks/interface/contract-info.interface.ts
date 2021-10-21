@@ -21,4 +21,5 @@ export interface ContractData {
   ganache?: Contracts
   ropsten?: Contracts
   rinkeby?: Contracts
+  mainnet?: Contracts
 }
