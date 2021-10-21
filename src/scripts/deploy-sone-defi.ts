@@ -22,7 +22,7 @@ async function main() {
   // Params
   const [wethAddress, soneAddress] = tokenNameToAddress(hre, 'weth', 'sone')
   const feeSetter = process.env.FEE_SETTER_ADDRESS || (process.env.PRIVATE_FEE_SETTER_ADDRESS as string)
-  const devAddresses = process.env.OPERATOR_ADDRESS || (process.env.PRIVATE_OPERATOR_ADDRESS as string)
+  const devAddresses = process.env.FEE_SETTER_ADDRESS || (process.env.FEE_SETTER_ADDRESS as string)
   const feeTo = process.env.FEE_TO_ADDRESS || process.env.FEE_SETTER_ADDRESS as string
   const rewardPerBlock = '5000000000000000000' // reward per block
   const startBlock = 13723975 // Blocker number 13546394 (on mainnet) ~ 2021-11-1 00:00 +08 timezone

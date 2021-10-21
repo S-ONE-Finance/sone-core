@@ -20,7 +20,8 @@
     "task:private": "hardhat --network private",
     "task:ganache": "hardhat --network ganache",
     "task:ropsten": "hardhat --network ropsten",
-    "task:rinkeby": "hardhat --network rinkeby"
+    "task:rinkeby": "hardhat --network rinkeby",
+    "task:mainnet": "hardhat --network mainnet"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",

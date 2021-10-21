@@ -3,6 +3,7 @@
 // File contracts/sone-smart-contracts/uniswapv2/interfaces/IUniswapV2Factory.sol
 
 // SPDX-License-Identifier: MIT
+
 pragma solidity >=0.5.0;
 
 interface IUniswapV2Factory {
@@ -33,6 +34,8 @@ interface IUniswapV2Factory {
 
 
 // File @openzeppelin/contracts/token/ERC20/IERC20.sol@v3.1.0
+
+
 
 pragma solidity ^0.6.0;
 
@@ -112,6 +115,8 @@ interface IERC20 {
 
 
 // File @openzeppelin/contracts/math/SafeMath.sol@v3.1.0
+
+
 
 pragma solidity ^0.6.0;
 
@@ -274,6 +279,7 @@ library SafeMath {
 
 // File contracts/sone-smart-contracts/uniswapv2/UniswapV2ERC20.sol
 
+
 pragma solidity =0.6.12;
 
 contract UniswapV2ERC20 {
@@ -369,6 +375,7 @@ contract UniswapV2ERC20 {
 
 // File contracts/sone-smart-contracts/uniswapv2/libraries/Math.sol
 
+
 pragma solidity =0.6.12;
 
 // a library for performing various math operations
@@ -396,6 +403,7 @@ library Math {
 
 // File contracts/sone-smart-contracts/uniswapv2/libraries/UQ112x112.sol
 
+
 pragma solidity =0.6.12;
 
 // a library for handling binary fixed point numbers (https://en.wikipedia.org/wiki/Q_(number_format))
@@ -420,6 +428,7 @@ library UQ112x112 {
 
 // File contracts/sone-smart-contracts/uniswapv2/interfaces/IUniswapV2Callee.sol
 
+
 pragma solidity >=0.5.0;
 
 interface IUniswapV2Callee {
@@ -428,6 +437,7 @@ interface IUniswapV2Callee {
 
 
 // File contracts/sone-smart-contracts/uniswapv2/UniswapV2Pair.sol
+
 
 pragma solidity =0.6.12;
 
@@ -644,17 +654,17 @@ contract UniswapV2Pair is UniswapV2ERC20 {
         uint amount0In = balance0 > _reserve0 - amount0Out ? balance0 - (_reserve0 - amount0Out) : 0;
         uint amount1In = balance1 > _reserve1 - amount1Out ? balance1 - (_reserve1 - amount1Out) : 0;
         require(amount0In > 0 || amount1In > 0, 'UniswapV2: INSUFFICIENT_INPUT_AMOUNT');
-        { // scope for reserve{0,1}Adjusted, avoids stack too deep errors
-        uint fee = IUniswapV2Factory(factory).swapFee();
-        uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(fee));
-        uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(fee));
-        require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'UniswapV2: K');
+        if(to != IUniswapV2Factory(factory).soneConvert()){
+            { // scope for reserve{0,1}Adjusted, avoids stack too deep errors
+            uint fee = IUniswapV2Factory(factory).swapFee();
+            uint balance0Adjusted = balance0.mul(1000).sub(amount0In.mul(fee));
+            uint balance1Adjusted = balance1.mul(1000).sub(amount1In.mul(fee));
+            require(balance0Adjusted.mul(balance1Adjusted) >= uint(_reserve0).mul(_reserve1).mul(1000**2), 'UniswapV2: K');
+            }
         }
-
         _update(balance0, balance1, _reserve0, _reserve1);
         emit Swap(msg.sender, amount0In, amount1In, amount0Out, amount1Out, to);
     }
-
     // force balances to match reserves
     function skim(address to) external lock {
         address _token0 = token0; // gas savings
@@ -671,6 +681,7 @@ contract UniswapV2Pair is UniswapV2ERC20 {
 
 
 // File contracts/sone-smart-contracts/uniswapv2/UniswapV2Factory.sol
+
 
 pragma solidity =0.6.12;
 

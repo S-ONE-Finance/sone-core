@@ -19,11 +19,13 @@ var privateTokens: TokenInfo[] = getTokens(format(TOKEN_PATH, 'private'))
 var ganacheTokens: TokenInfo[] = getTokens(format(TOKEN_PATH, 'ganache'))
 var ropstenTokens: TokenInfo[] = getTokens(format(TOKEN_PATH, 'ropsten'))
 var rinkebyTokens: TokenInfo[] = getTokens(format(TOKEN_PATH, 'rinkeby'))
+var mainnetTokens: TokenInfo[] = getTokens(format(TOKEN_PATH, 'mainnet'))
 
 var privateSone: SoneContracts = getSoneContracts(format(SONE_PATH, 'private'))
 var ganacheSone: SoneContracts = getSoneContracts(format(SONE_PATH, 'ganache'))
 var ropstenSone: SoneContracts = getSoneContracts(format(SONE_PATH, 'ropsten'))
 var rinkebySone: SoneContracts = getSoneContracts(format(SONE_PATH, 'rinkeby'))
+var mainnetSone: SoneContracts = getSoneContracts(format(SONE_PATH, 'mainnet'))
 
 export const contractData: ContractData = {
   private: {
@@ -41,5 +43,9 @@ export const contractData: ContractData = {
   rinkeby: {
     tokens: rinkebyTokens,
     sone: rinkebySone,
+  },
+  mainnet: {
+    tokens: mainnetTokens,
+    sone: mainnetSone,
   },
 }
